@@ -1,0 +1,58 @@
+.slider {
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  background: none;
+  accent-color: var(--accent);
+  cursor: pointer;
+  appearance: none;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--panel-sunken);
+  border-radius: 2px;
+  box-shadow: var(--shadow-sunken);
+}
+
+.slider::-moz-range-track {
+  height: 4px;
+  background: var(--panel-sunken);
+  border-radius: 2px;
+  box-shadow: var(--shadow-sunken);
+}
+
+/* 旋钮式拇指: 金属质感 + 中心刻线 */
+.slider::-webkit-slider-thumb {
+  width: 10px;
+  height: 20px;
+  margin-top: -8px;
+  appearance: none;
+  background: linear-gradient(90deg, var(--ink) 0 45%, var(--panel-raised) 45% 55%, var(--ink) 55%);
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px oklch(20% 0.02 60 / 0.5);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.slider::-moz-range-thumb {
+  width: 10px;
+  height: 20px;
+  background: linear-gradient(90deg, var(--ink) 0 45%, var(--panel-raised) 45% 55%, var(--ink) 55%);
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px oklch(20% 0.02 60 / 0.5);
+}
+
+.slider:hover::-webkit-slider-thumb {
+  transform: scaleY(1.12);
+}
+
+.slider:active::-webkit-slider-thumb {
+  transform: scaleY(0.94);
+}
+
+.slider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

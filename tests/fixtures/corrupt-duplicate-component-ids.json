@@ -1,0 +1,71 @@
+{
+  "id": "3f2b8c1e-6a4d-4e2b-9c7a-1d5e8f0a2b3c",
+  "schemaVersion": 1,
+  "name": "呼吸的方波",
+  "components": [
+    {
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "amplitude": {
+        "kind": "animated",
+        "keyframes": [
+          {
+            "time": 0,
+            "value": 0,
+            "easing": "linear"
+          },
+          {
+            "time": 2.5,
+            "value": 1.5,
+            "easing": "smooth"
+          },
+          {
+            "time": 5,
+            "value": 1,
+            "easing": "hold"
+          }
+        ]
+      },
+      "frequency": {
+        "kind": "constant",
+        "value": 0.2
+      },
+      "phase": {
+        "kind": "constant",
+        "value": 0
+      },
+      "enabled": true,
+      "color": "c0"
+    },
+    {
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "amplitude": {
+        "kind": "constant",
+        "value": 0.333
+      },
+      "frequency": {
+        "kind": "animated",
+        "keyframes": [
+          {
+            "time": 1,
+            "value": 0.6,
+            "easing": "linear"
+          },
+          {
+            "time": 4,
+            "value": -0.6,
+            "easing": "linear"
+          }
+        ]
+      },
+      "phase": {
+        "kind": "constant",
+        "value": 90
+      },
+      "enabled": false,
+      "color": "c11"
+    }
+  ],
+  "presentationMode": "waveform",
+  "createdAt": "2026-09-01T08:00:00.000Z",
+  "updatedAt": "2026-09-02T09:30:00.000Z"
+}

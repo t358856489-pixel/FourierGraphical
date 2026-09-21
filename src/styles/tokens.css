@@ -1,0 +1,74 @@
+/* 视觉方向: 实验仪器 / 示波器 —— 深色荧光屏画布 + 暖色纸面仪器面板 (research R10) */
+:root {
+  /* 荧光屏(画布)表面 */
+  --screen-bg: oklch(17% 0.025 165);
+  --screen-bg-deep: oklch(12% 0.02 165);
+  --screen-grid: oklch(34% 0.04 165);
+  --screen-grid-major: oklch(44% 0.05 165);
+  --screen-axis: oklch(58% 0.06 165);
+  --screen-trace: oklch(88% 0.19 145);
+  --screen-vector: oklch(92% 0.03 165);
+  --screen-circle: oklch(70% 0.04 165);
+  --screen-text: oklch(82% 0.05 165);
+
+  /* 仪器面板(纸面)表面 */
+  --panel-bg: oklch(93% 0.018 85);
+  --panel-raised: oklch(96.5% 0.014 85);
+  --panel-sunken: oklch(88% 0.022 85);
+  --panel-line: oklch(74% 0.03 80);
+  --ink: oklch(24% 0.02 60);
+  --ink-soft: oklch(42% 0.025 60);
+  --bezel: oklch(22% 0.015 165);
+
+  /* 语义色 */
+  --accent: oklch(52% 0.17 35);
+  --accent-ink: oklch(98% 0.01 85);
+  --danger: oklch(48% 0.19 25);
+  --ok: oklch(45% 0.12 150);
+  --focus-ring: oklch(55% 0.2 255);
+
+  /* 12 个分量语义色: 在荧光屏上作线条, 在面板上置于深色 bezel 内作色标 */
+  --component-c0: oklch(80% 0.17 145);
+  --component-c1: oklch(78% 0.15 60);
+  --component-c2: oklch(74% 0.16 250);
+  --component-c3: oklch(76% 0.18 350);
+  --component-c4: oklch(84% 0.16 100);
+  --component-c5: oklch(76% 0.13 200);
+  --component-c6: oklch(72% 0.19 25);
+  --component-c7: oklch(76% 0.15 300);
+  --component-c8: oklch(82% 0.14 170);
+  --component-c9: oklch(80% 0.12 80);
+  --component-c10: oklch(78% 0.12 230);
+  --component-c11: oklch(80% 0.14 330);
+
+  /* 字体 */
+  --font-ui: 'IBM Plex Sans', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-display: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  --text-readout: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+
+  /* 间距节奏: 面板内紧凑, 区块间疏朗 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2.25rem;
+
+  --radius-knob: 999px;
+  --radius-panel: 3px;
+  --radius-screen: 14px;
+
+  --shadow-raised: 0 1px 0 oklch(100% 0 0 / 0.7) inset, 0 1px 2px oklch(30% 0.02 60 / 0.25);
+  --shadow-sunken: 0 1px 2px oklch(30% 0.02 60 / 0.3) inset;
+  --shadow-screen: 0 0 0 2px var(--bezel), 0 0 0 3px oklch(60% 0.02 85), 0 12px 32px oklch(20% 0.02 60 / 0.35);
+
+  --duration-fast: 120ms;
+  --duration-normal: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
