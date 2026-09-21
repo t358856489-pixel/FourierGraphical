@@ -1,0 +1,71 @@
+.number-field {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.number-field__label {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.number-field__box {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sunken);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.number-field__box:hover {
+  border-color: var(--ink-soft);
+}
+
+.number-field__box:focus-within {
+  border-color: var(--focus-ring);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.number-field__input {
+  width: 100%;
+  min-width: 3.5ch;
+  /* WCAG 2.2 目标尺寸: 触控目标不小于 24px */
+  min-height: 1.5rem;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  background: none;
+  border: 0;
+  outline: none;
+}
+
+.number-field__input[aria-invalid='true'] {
+  color: var(--danger);
+}
+
+.number-field__unit {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.number-field__error {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  right: 0;
+  margin: 2px 0 0;
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  color: var(--accent-ink);
+  background: var(--danger);
+  border-radius: var(--radius-panel);
+}

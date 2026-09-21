@@ -1,0 +1,80 @@
+.timeline {
+  padding: var(--space-2) var(--space-3);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-raised);
+}
+
+.timeline__track {
+  position: relative;
+}
+
+.timeline__ruler {
+  position: relative;
+  height: 2.25rem;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--panel-line) 0 1px,
+    transparent 1px 1%
+  );
+  background-size: 100% 6px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.timeline__tick {
+  position: absolute;
+  bottom: 8px;
+  padding-left: 3px;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  border-left: 1px solid var(--ink-soft);
+}
+
+.timeline__loop {
+  position: absolute;
+  bottom: 0;
+  height: 6px;
+  background: var(--panel-line);
+}
+
+.timeline__loop[data-enabled='true'] {
+  background: var(--accent);
+}
+
+.timeline__playhead {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  height: calc(2.25rem + 4px);
+  pointer-events: none;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--accent);
+}
+
+.timeline__playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -4px;
+  border: 5px solid transparent;
+  border-top-color: var(--accent);
+}
+
+/* 原生 range 是可访问的主滑块, 叠在自绘刻度之上 */
+.timeline__scrubber {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 2.25rem;
+  margin: 0;
+  cursor: ew-resize;
+  opacity: 0;
+}
+
+.timeline__scrubber:focus-visible {
+  opacity: 0.35;
+}

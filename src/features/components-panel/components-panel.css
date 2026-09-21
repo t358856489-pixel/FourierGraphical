@@ -1,0 +1,117 @@
+.components-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  min-height: 0;
+  height: 100%;
+}
+
+.components-panel__header,
+.components-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.components-panel__count {
+  margin-left: var(--space-2);
+  letter-spacing: 0;
+}
+
+.components-panel__tools {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.components-panel__list {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-1) var(--space-1) 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.components-panel__empty {
+  align-self: center;
+  margin: 0;
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--ink-soft);
+  border: 1px dashed var(--panel-line);
+  border-radius: var(--radius-panel);
+}
+
+.components-panel__limit {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.component-row {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-raised);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.component-row[data-highlighted='true'] {
+  border-color: var(--ink);
+}
+
+.component-row[data-enabled='false'] {
+  background: var(--panel-bg);
+  box-shadow: none;
+}
+
+.component-row__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.component-row__chip {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1rem;
+  background: var(--bezel);
+  border-radius: 2px;
+}
+
+.component-row__chip span {
+  width: 0.875rem;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.component-row__title {
+  font-size: var(--text-sm);
+}
+
+.component-row__enable {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.component-row__actions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.component-row__actions .button {
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  box-shadow: none;
+}
