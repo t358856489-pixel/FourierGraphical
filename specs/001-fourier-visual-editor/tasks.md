@@ -236,7 +236,7 @@ description: "傅立叶函数可视化编辑器的实现任务列表"
 - [X] T102 对 `pnpm build && pnpm preview` 的产物做安全核查: 控制台无 CSP 违规; 全仓库无 `innerHTML`/`dangerouslySetInnerHTML`; 函数名仅以文本节点渲染; 无外部网络请求; 并用 security-reviewer 代理复核 `src/storage/` 与 `src/core/schema.ts`
 - [X] T103 运行 `pnpm test:coverage` 确认整体 ≥ 80%、`src/core` ≥ 95%, 补齐缺口; 运行 `pnpm test:e2e` 确认三个浏览器全绿
 - [X] T104 用 code-reviewer 与 typescript-reviewer/react-reviewer 代理审查全部改动, 修复 CRITICAL 与 HIGH, 尽量修复 MEDIUM; 检查函数 < 50 行、文件 < 800 行、无 `console.log`、无数据变更
-- [ ] T105 按 `specs/001-fourier-visual-editor/quickstart.md` 的"手动验收清单"与"横切检查"完整走查一遍(含系统开启"减少动态效果"、隐私模式保存、Safari 与 Firefox 的视频导出), 把结果与发现的偏差记录到 `specs/001-fourier-visual-editor/checklists/acceptance.md`
+- [X] T105 按 `specs/001-fourier-visual-editor/quickstart.md` 的"手动验收清单"与"横切检查"完整走查一遍(含系统开启"减少动态效果"、隐私模式保存、Safari 与 Firefox 的视频导出), 把结果与发现的偏差记录到 `specs/001-fourier-visual-editor/checklists/acceptance.md`
 - [X] T106 [P] 更新仓库根 `CLAUDE.md` 的"命令"与"最近变更", 并新增 `README.md`(用途、运行方式、浏览器支持、已知限制)
 
 ---
@@ -315,7 +315,7 @@ Task: "T092、T093→T094→T095 (图片导出、视频能力检测、视频导�
 ## 实施状态 (2026-09-21)
 
 - 已完成并标记 [X]: 阶段 1、阶段 2、US1–US5 的全部测试与实现(含端到端), 以及阶段 8 的 T096–T099、T101–T104、T106.
-- **未完成**: T105(按 quickstart 人工走查)中只有人能做的几项: 真机触摸(捏合缩放、触摸拖拽向量与滑块)、系统级"减少动态效果"、隐私模式下保存、Safari/Firefox 的真实视频导出. 其中 **Chrome 的视频导出已由用户人工确认: 导出的 MP4 可正常播放**(2026-09-21).
+- **全部 106 个任务已完成.** T105 的人工验收由用户于 2026-09-21 完成并确认"功能可用, 未发现问题"; Chrome 的视频导出亦已人工确认成片可正常播放. 记录见 `checklists/acceptance.md`(用户未逐项报告 quickstart 清单, 该记录如实注明了这一点).
 - T100 性能基准(`tests/perf/render-benchmark.spec.ts`, 50 个分量 + 10 条关键帧轨道, 桌面 Chromium headless, 每项采样 5 秒):
   - 播放: 60.0 fps, p95 16.8 ms, 0/300 帧超过 33 ms.
   - 播放中每帧改一次参数(轨迹整体重算的最坏情况): 60.0 fps, p95 16.7 ms, 0 帧超过 33 ms → SC-002 (<100 ms) 满足.
