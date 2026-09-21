@@ -16,6 +16,7 @@ pnpm dev              # 开发服务器
 pnpm test             # 单元 / 组件 / 集成测试
 pnpm test:coverage    # 覆盖率门槛: 整体 80%, src/core 95%
 pnpm exec playwright install && pnpm test:e2e   # 端到端、可访问性、响应式
+pnpm test:perf         # 50 个分量的渲染基准 (桌面 Chromium, 含 4× CPU 降速估算)
 pnpm lint && pnpm typecheck
 pnpm size             # 生产构建 + 包体预算检查
 ```

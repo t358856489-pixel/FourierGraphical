@@ -8,8 +8,11 @@ test('plays automatically on open, pauses, and resumes from the same moment', as
 
   await page.getByRole('button', { name: '暂停', exact: true }).click()
   const paused = await currentTime(page)
-  const frozen = await stillShot(page)
-  expect(await stillShot(page)).toBe(frozen)
+  // 暂停后画面不再变化: 连续两张一致. 用轮询是因为紧跟暂停的第一张可能赶在最后一帧合成之前;
+  // 如果动画并未停止, 这个条件永远无法满足
+  await expect
+    .poll(async () => (await stillShot(page)) === (await stillShot(page)))
+    .toBe(true)
 
   await page.getByRole('button', { name: '播放', exact: true }).click()
   await expect.poll(() => currentTime(page)).toBeGreaterThan(paused)
