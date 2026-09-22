@@ -145,7 +145,7 @@ description: "画布显示选项的实现任务列表"
 - [X] T043 运行 `pnpm test:coverage`(整体 ≥ 80%, `src/core` ≥ 95%)、`pnpm lint`、`pnpm typecheck`、`pnpm size`(首屏 JS < 300 KB)、四个浏览器配置的 `pnpm test:e2e` 连续 3 次全绿; 确认 T001 快照文件与 T002 指纹自提交以来**没有被改动过**(`git log -p` 检查这两个文件)
 - [X] T044 用 code-reviewer 与 react-reviewer 代理审查本功能的全部改动(重点: `planTrail`/缓存的边界、步长放大、`derivePalette` 的收敛与数值稳定、面板是否每帧重渲染、章程原则 I 与 V), 修复 CRITICAL 与 HIGH, 尽量修复 MEDIUM; 每个修复先补失败测试
 - [X] T045 [P] 更新 `README.md`(显示选项与已知限制)、`CLAUDE.md`"最近变更"; 把功能 001 `data-model.md` 中 `ViewSettings` 一节加一行指向本功能 data-model.md 的说明
-- [ ] T046 按 `specs/002-canvas-display-options/quickstart.md` 的手动验收清单完整走查一遍, 把结果与偏差记入 `specs/002-canvas-display-options/checklists/acceptance.md`; 由人确认的条目如实标注是谁、何时确认, 未逐项确认的不写"通过"
+- [X] T046 按 `specs/002-canvas-display-options/quickstart.md` 的手动验收清单完整走查一遍, 把结果与偏差记入 `specs/002-canvas-display-options/checklists/acceptance.md`; 由人确认的条目如实标注是谁、何时确认, 未逐项确认的不写"通过"
 
 ---
 
@@ -210,7 +210,7 @@ Task: "T033 src/features/display-panel/BackgroundPicker.test.tsx"
 
 ## 实施状态 (2026-09-22)
 
-- 已完成并标记 [X]: 阶段 1、2, US1–US3 的全部测试与实现, 阶段 6 的 T039–T045. **未完成**: T046(人工走查, 需要用户).
+- 已完成并标记 [X]: 阶段 1、2, US1–US3 的全部测试与实现, **全部 46 个任务已完成.** T046 的人工走查由用户于 2026-09-22 完成, 记录见 `checklists/acceptance.md`.
 - 代码审查(T044)结论: 通过, 0 CRITICAL / 0 HIGH / 1 MEDIUM / 1 LOW; 两项均已修复(缩短窗口显式不短于高亮段并加性质测试; 提示文字的 id 改用 useId).
 - 单元/组件/集成: 54 个文件 502 个测试, 覆盖率整体 90.9%、`src/core` 99.4%. 端到端: 四个浏览器配置 205 通过、7 跳过, 连续 3 次全量一致. T001 快照与 T002 截图基线自录制以来未改动过.
 - 性能基准(50 个分量、淡化关闭、"全部"、t = 600, 桌面 Chromium): 周期函数播放 60.0 fps(p95 16.7 ms); 非周期函数走满 4 万点预算 59.6 fps(p95 16.7 ms, 最慢 49.9 ms); 非周期 + 每帧改参数 16.3 fps(p95 66.7 ms, 满足 SC-002 的 100 ms). 三个场景均达标, **未启用**任何后备方案.
