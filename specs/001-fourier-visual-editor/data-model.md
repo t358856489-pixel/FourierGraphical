@@ -117,6 +117,8 @@ y(t)        = tip_N(t).y                                                        
 
 ## ViewSettings (视图设置)
 
+> 功能 002 增加了 `showAxes`、`trailFade`、`trailRetention`、`background` 四个字段, 见 [002 的数据模型](../002-canvas-display-options/data-model.md).
+
 | 字段 | 类型 | 规则 |
 |---|---|---|
 | `zoom` | `number \| 'auto'` | `'auto'` = 自动适配 (FR-011); 手动范围 0.1–20 |
