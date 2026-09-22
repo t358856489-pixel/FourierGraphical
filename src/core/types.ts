@@ -50,6 +50,9 @@ export interface Vec2 {
   readonly y: number
 }
 
+/** 轨迹保留时长(秒); 'all' = 从 0 秒起, 受 MAX_RETENTION_SECONDS 约束 */
+export type TrailRetention = 5 | 10 | 30 | 60 | 120 | 300 | 600 | 'all'
+
 export interface ViewSettings {
   readonly zoom: number | 'auto'
   readonly pan: Vec2
@@ -58,8 +61,32 @@ export interface ViewSettings {
   readonly showTrail: boolean
   readonly showGrid: boolean
   readonly trailSeconds: number
+  /** 坐标轴与波形区的零值基准线; showGrid 只管网格线与时间刻度线 */
+  readonly showAxes: boolean
+  /** true = 功能 001 的余辉效果; false = 按 trailRetention 保留轨迹 */
+  readonly trailFade: boolean
+  readonly trailRetention: TrailRetention
+  /** null = 应用默认背景; 否则为小写的 #rrggbb */
+  readonly background: string | null
   readonly highlightedComponentId: string | null
   readonly selectedComponentId: string | null
+}
+
+/** 这一帧要画哪一段轨迹、怎么采样; 每帧由 (函数, t, 显示选项, 呈现模式) 重新算出, 不保存 */
+export interface TrailPlan {
+  readonly start: number
+  readonly end: number
+  readonly step: number
+  /** step = 基础步长 × 2^stepPower; fading 模式下恒为 0 */
+  readonly stepPower: number
+  /** 保留模式下, 这个时刻之后的轨迹更亮 */
+  readonly highlightStart: number
+  readonly mode: 'fading' | 'retained'
+  readonly samplesPerTurn: number
+  /** "全部"且已超过保留上限 */
+  readonly isCapped: boolean
+  /** 为保证形状正确(采样不低于每圈 MIN_SAMPLES_PER_TURN 点), 实际保留窗口短于用户所选 */
+  readonly isShortened: boolean
 }
 
 export interface History {

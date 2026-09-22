@@ -33,3 +33,12 @@ for (const [button, dialog] of [
     expect(await seriousViolations(page)).toEqual([])
   })
 }
+
+for (const background of ['默认深色', '纯白'] as const) {
+  test(`the display panel on a ${background} canvas has no serious violations`, async ({ page }) => {
+    await page.getByText('画面', { exact: true }).click()
+    await page.getByRole('button', { name: background }).click()
+    await page.getByRole('button', { name: '轨迹淡化' }).click()
+    expect(await seriousViolations(page)).toEqual([])
+  })
+}

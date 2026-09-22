@@ -25,6 +25,10 @@ const view: ViewSettings = {
   showTrail: true,
   showGrid: false,
   trailSeconds: 8,
+  showAxes: true,
+  trailFade: true,
+  trailRetention: 'all',
+  background: null,
   highlightedComponentId: null,
   selectedComponentId: first.id,
 }

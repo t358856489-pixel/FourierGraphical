@@ -1,0 +1,162 @@
+.display-panel {
+  position: relative;
+}
+
+.display-panel__summary {
+  list-style: none;
+  user-select: none;
+}
+
+.display-panel__summary::-webkit-details-marker {
+  display: none;
+}
+
+.display-panel__summary::after {
+  content: '▾';
+  font-size: var(--text-xs);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.display-panel[open] > .display-panel__summary {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sunken);
+}
+
+.display-panel[open] > .display-panel__summary::after {
+  transform: rotate(180deg);
+}
+
+/* 浮在画布上方的仪器面板, 不挤占画布高度 */
+.display-panel__body {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  display: grid;
+  gap: var(--space-4);
+  width: min(19rem, calc(100vw - 2rem));
+  padding: var(--space-4);
+  background: var(--panel-raised);
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 16px 40px oklch(20% 0.02 60 / 0.35);
+}
+
+.display-panel__section {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.display-panel__section + .display-panel__section {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--panel-line);
+}
+
+.display-panel__field {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.display-panel__field select {
+  min-height: 1.75rem;
+  padding: 2px var(--space-2);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+}
+
+.display-panel__field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.display-panel__hint,
+.display-panel__status {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.display-panel__status {
+  padding-left: var(--space-2);
+  color: var(--ink);
+  border-left: 2px solid var(--accent);
+}
+
+.background-picker__presets {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* 色块自带描边: 白色块在浅色面板上、深色块在深色区域上都看得见 */
+.background-picker__swatch {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  cursor: pointer;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.35);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.background-picker__swatch:hover {
+  transform: scale(1.08);
+}
+
+.background-picker__swatch[aria-pressed='true'] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.background-picker__custom {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.background-picker__color {
+  width: 2.5rem;
+  height: 1.75rem;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+}
+
+.background-picker__hex {
+  min-height: 1.75rem;
+  padding: 2px var(--space-2);
+  font-size: var(--text-sm);
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sunken);
+}
+
+.background-picker__hex[aria-invalid='true'] {
+  color: var(--danger);
+}
+
+.background-picker__error {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--danger);
+}
+
+/* 窄屏: 工具栏会换行, "画面"按钮可能落在左侧; 面板改为相对工具栏铺满可用宽度, 不再向一侧溢出视口 */
+@media (max-width: 900px) {
+  .display-panel {
+    position: static;
+  }
+
+  .display-panel__body {
+    right: 0;
+    left: 0;
+    width: auto;
+  }
+}

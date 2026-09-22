@@ -29,11 +29,16 @@ const heavyFunction = (): FourierFunction => {
   }, preset.value)
 }
 
-const loadDraft = async (page: Page, fn: FourierFunction) => {
+const loadDraft = async (
+  page: Page,
+  fn: FourierFunction,
+  view: Draft['view'] = INITIAL_VIEW,
+  time = 0,
+) => {
   const draft: Draft = {
     function: fn,
-    playback: { time: 0, speed: 1, loop: null },
-    view: INITIAL_VIEW,
+    playback: { time, speed: 1, loop: null },
+    view,
     savedFunctionId: null,
     isDirty: true,
   }
@@ -140,5 +145,53 @@ test.describe('render benchmark: 50 components, 10 keyframed tracks', () => {
     expect(playback.p95Ms).toBeLessThan(TWO_FRAMES_MS)
     // 降速下每帧编辑仍须满足 SC-002 的 100 ms 响应
     expect(editing.p95Ms).toBeLessThan(100)
+  })
+})
+
+/**
+ * 功能 002 (SC-004): 轨迹淡化关闭、保留"全部"、t = 600.
+ * a) 周期函数: 只需采样一个周期; b) 不成整数比: 走满点数预算; c) 场景 b 下每帧改一次参数(整条轨迹重算).
+ */
+test.describe('retained trail at the ten minute cap: 50 components', () => {
+  test.skip(({ browserName, isMobile }) => browserName !== 'chromium' || isMobile, 'Chromium desktop only')
+  test.describe.configure({ mode: 'serial' })
+
+  const retainedView = { ...INITIAL_VIEW, trailFade: false, trailRetention: 'all' as const }
+  const periodic = (): FourierFunction => {
+    const preset = applyPreset(createDefaultFunction(), 'sawtooth', MAX_COMPONENTS)
+    if (!preset.ok) throw new Error(preset.error.message)
+    return { ...preset.value, presentationMode: 'drawing2d' }
+  }
+  const aperiodic = (): FourierFunction => {
+    const fn = periodic()
+    return fn.components.slice(0, 5).reduce((current, component) => {
+      const value = component.frequency.kind === 'constant' ? component.frequency.value : 0
+      return updateTrack(current, component.id, 'frequency', { kind: 'constant', value: value * 1.0007123 })
+    }, fn)
+  }
+
+  test('a periodic figure plays at 60 fps', async ({ page }) => {
+    await loadDraft(page, periodic(), retainedView, 600)
+    // 应用打开后自动播放
+    await expect(page.getByRole('button', { name: '暂停', exact: true })).toBeVisible()
+    const stats = await measureFrames(page, MEASURE_MS, false)
+    report('retained "all", t=600, periodic', stats)
+    expect(stats.p95Ms).toBeLessThan(25)
+  })
+
+  test('a non-periodic figure using the full point budget plays at 60 fps', async ({ page }) => {
+    await loadDraft(page, aperiodic(), retainedView, 600)
+    // 应用打开后自动播放
+    await expect(page.getByRole('button', { name: '暂停', exact: true })).toBeVisible()
+    const stats = await measureFrames(page, MEASURE_MS, false)
+    report('retained "all", t=600, non-periodic (full budget)', stats)
+    expect(stats.p95Ms).toBeLessThan(25)
+  })
+
+  test('editing a parameter every frame redraws the whole retained trail within 100 ms', async ({ page }) => {
+    await loadDraft(page, aperiodic(), retainedView, 600)
+    const stats = await measureFrames(page, MEASURE_MS, true)
+    report('retained "all", t=600, non-periodic, edit every frame', stats)
+    expect(stats.p95Ms).toBeLessThan(100)
   })
 })

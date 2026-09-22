@@ -1,7 +1,7 @@
-import { boundingRadius, sampleTrail, vectorChain } from '../core/evaluator'
-import { DEFAULT_MAX_TRAIL_POINTS } from '../core/ranges'
+import { boundingRadius, vectorChain } from '../core/evaluator'
+import { planTrail, sampleTrailPlan } from '../core/trailPlan'
 import type { FourierFunction, PresentationMode, ViewSettings } from '../core/types'
-import { drawCircles, drawTip, drawTrail, drawVectors } from './drawEpicycles'
+import { drawCircles, drawRetainedTrail, drawTip, drawTrail, drawVectors } from './drawEpicycles'
 import { drawGrid, type Ctx2D } from './drawGrid'
 import { drawTimeTicks, drawWaveform } from './drawWaveform'
 import type { RenderTheme } from './theme'
@@ -69,16 +69,25 @@ export const drawFrame = (
   const regions = layoutRegions(fn.presentationMode, size)
   const viewport = createViewport(view, boundingRadius(fn), regions.epicycles)
   const chain = vectorChain(fn, t)
+  // 轨迹的区间与采样方式由纯函数决定, 不累积 (章程原则 I)
+  const plan = planTrail(fn, t, view, fn.presentationMode)
   const needsTrail = view.showTrail || regions.waveform !== null
   const trail = needsTrail
-    ? (presampledTrail ?? sampleTrail(fn, t, view.trailSeconds, DEFAULT_MAX_TRAIL_POINTS))
+    ? (presampledTrail ?? sampleTrailPlan(fn, plan))
     : new Float64Array(0)
 
   ctx.save()
   clipTo(ctx, regions.epicycles)
-  if (view.showGrid) drawGrid(ctx, regions.epicycles, viewport, theme)
+  drawGrid(ctx, regions.epicycles, viewport, theme, {
+    grid: view.showGrid,
+    axes: view.showAxes,
+    verticals: true,
+  })
   if (view.showCircles) drawCircles(ctx, chain, viewport, view, theme)
-  if (view.showTrail && regions.waveform === null) drawTrail(ctx, trail, viewport, theme)
+  if (view.showTrail && regions.waveform === null) {
+    if (plan.mode === 'retained') drawRetainedTrail(ctx, trail, plan, viewport, theme)
+    else drawTrail(ctx, trail, viewport, theme)
+  }
   if (view.showVectors) drawVectors(ctx, chain, viewport, view, theme)
   drawTip(ctx, chain, viewport, theme)
   ctx.restore()
@@ -86,10 +95,13 @@ export const drawFrame = (
   if (!regions.waveform) return
   ctx.save()
   clipTo(ctx, regions.waveform)
-  if (view.showGrid) {
-    drawGrid(ctx, regions.waveform, viewport, theme, false)
-    drawTimeTicks(ctx, t, view.trailSeconds, regions.waveform, theme)
-  }
+  drawGrid(ctx, regions.waveform, viewport, theme, {
+    grid: view.showGrid,
+    axes: view.showAxes,
+    verticals: false,
+  })
+  // 波形区的竖线是时间刻度, 属于"网格" (FR-011)
+  if (view.showGrid) drawTimeTicks(ctx, t, view.trailSeconds, regions.waveform, theme)
   ctx.restore()
   if (view.showTrail) {
     drawWaveform(
@@ -101,6 +113,8 @@ export const drawFrame = (
       viewport,
       chain.at(-1)?.to ?? null,
       theme,
+      view.showAxes,
+      plan,
     )
   }
 }

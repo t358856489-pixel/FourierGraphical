@@ -14,6 +14,10 @@ const view: ViewSettings = {
   showTrail: true,
   showGrid: true,
   trailSeconds: DEFAULT_TRAIL_SECONDS,
+  showAxes: true,
+  trailFade: true,
+  trailRetention: 'all',
+  background: null,
   highlightedComponentId: null,
   selectedComponentId: null,
 }
@@ -75,12 +79,13 @@ describe('drawFrame', () => {
   test('highlighting dims the other vectors and thickens the highlighted one', () => {
     const highlighted = fn.components[1]
     if (!highlighted) throw new Error('fixture')
-    // 关闭网格/轨迹/圆并用二维模式后, 剩下的"两点线段"描边只有向量
+    // 关闭网格/坐标轴/轨迹/圆并用二维模式后, 剩下的"两点线段"描边只有向量
     const fake = render(
       {
         highlightedComponentId: highlighted.id,
         showCircles: false,
         showGrid: false,
+        showAxes: false,
         showTrail: false,
       },
       setPresentationMode(fn, 'drawing2d'),
@@ -114,5 +119,60 @@ describe('drawFrame', () => {
     const fake = createFakeContext()
     drawFrame(fake.ctx, fn, 5, view, size, FALLBACK_THEME, trail)
     expect(fake.calls).toEqual(render().calls)
+  })
+})
+
+describe('drawFrame: grid and axes are independent (feature 002)', () => {
+  const axisStrokes = (overrides: Partial<ViewSettings>) =>
+    render(overrides).calls.filter(
+      (call) => call.method === 'stroke' && call.strokeStyle === FALLBACK_THEME.axis,
+    ).length
+
+  test('hiding the axes removes every axis-coloured line, including the waveform baseline', () => {
+    expect(axisStrokes({})).toBeGreaterThanOrEqual(3)
+    expect(axisStrokes({ showAxes: false })).toBe(0)
+  })
+
+  test('hiding the grid keeps the axes and the waveform baseline', () => {
+    expect(axisStrokes({ showGrid: false })).toBe(axisStrokes({}))
+  })
+
+  test('hiding the grid removes the waveform time ticks', () => {
+    const count = (overrides: Partial<ViewSettings>) => render(overrides).count('stroke')
+    expect(count({ showGrid: false, showAxes: false })).toBeLessThan(count({ showAxes: false }))
+  })
+})
+
+describe('drawFrame: retained trail (feature 002)', () => {
+  const drawing = setPresentationMode(fn, 'drawing2d')
+  const traceStrokes = (fake: ReturnType<typeof render>) =>
+    fake.calls.filter((call) => call.method === 'stroke' && call.lineWidth === 2)
+
+  test('with fading off, the 2D trail is drawn opaquely, starting with the normal-brightness colour', () => {
+    const strokes = traceStrokes(render({ trailFade: false }, drawing, 20))
+    expect(strokes.length).toBeGreaterThan(1)
+    expect(strokes.every((call) => call.globalAlpha === 1)).toBe(true)
+    expect(strokes[0]?.strokeStyle).toBe(FALLBACK_THEME.traceNormal)
+  })
+
+  test('with fading on, the trail still fades through transparency as before', () => {
+    const strokes = traceStrokes(render({}, drawing, 20))
+    expect(strokes.some((call) => Number(call.globalAlpha) < 1)).toBe(true)
+  })
+
+  test('the retained 2D trail reaches back to zero, far beyond the fading window', () => {
+    const points = (overrides: Partial<ViewSettings>) => render(overrides, drawing, 4).count('lineTo')
+    const longAgo = (overrides: Partial<ViewSettings>) => render(overrides, drawing, 40).count('lineTo')
+    expect(points({ trailFade: false })).toBeLessThan(longAgo({ trailFade: false }))
+  })
+
+  test('the waveform keeps its window but switches to the opaque brightness rule', () => {
+    const strokes = traceStrokes(render({ trailFade: false }, fn, 20))
+    expect(strokes.every((call) => call.globalAlpha === 1)).toBe(true)
+    expect(strokes.map((call) => call.strokeStyle)).toContain(FALLBACK_THEME.traceNormal)
+  })
+
+  test('hiding the trail hides it in either mode', () => {
+    expect(traceStrokes(render({ trailFade: false, showTrail: false }, drawing, 20))).toHaveLength(0)
   })
 })

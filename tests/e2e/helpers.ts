@@ -17,6 +17,11 @@ export const openPaused = async (page: Page): Promise<void> => {
   await page.goto('/')
   await expect(canvas(page)).toBeVisible()
   await expect(page.getByRole('button', { name: '播放', exact: true })).toBeVisible()
+  // 等网页字体就绪: 字体换入会让工具栏重新换行, 进而改变画布尺寸, 使紧随其后的截图与稍后的不一致
+  await page.evaluate(async () => {
+    await document.fonts.ready
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  })
 }
 
 export const seekTo = async (page: Page, seconds: number | string): Promise<void> => {

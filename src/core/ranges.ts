@@ -1,4 +1,4 @@
-import type { ParamName, Range } from './types'
+import type { ParamName, Range, TrailRetention } from './types'
 
 export const AMPLITUDE_RANGE: Range = { min: 0, max: 100, step: 0.01, unit: '' }
 export const FREQUENCY_RANGE: Range = { min: -100, max: 100, step: 0.001, unit: '圈/秒' }
@@ -61,3 +61,25 @@ export const decimalsOf = (step: number): number => {
 
 export const formatValue = (value: number, step: number): string =>
   String(Number(value.toFixed(decimalsOf(step))))
+
+// —— 功能 002: 画布显示选项 ——
+export const TRAIL_RETENTION_OPTIONS: readonly TrailRetention[] = [5, 10, 30, 60, 120, 300, 600, 'all']
+export const MAX_RETENTION_SECONDS = 600
+/** 保留模式下最新的这一段更亮, 并平滑过渡到正常亮度 */
+export const HIGHLIGHT_SECONDS = 2
+export const HIGHLIGHT_BANDS = 12
+/** 正常亮度 = 轨迹色与背景色按此比例混合(越大越接近轨迹色) */
+export const NORMAL_BRIGHTNESS_MIX = 0.55
+export const RETAINED_TRAIL_POINT_BUDGET = 40000
+/** 形状永远正确: 保留模式的采样不得低于每圈这么多点, 不够时缩短实际保留窗口 */
+export const MIN_SAMPLES_PER_TURN = 8
+export const SMOOTH_BELOW_SAMPLES_PER_TURN = 16
+export const MIN_LINE_CONTRAST = 3
+export const MIN_TEXT_CONTRAST = 4.5
+
+export const BACKGROUND_PRESETS: readonly { readonly name: string; readonly value: string | null }[] = [
+  { name: '默认深色', value: null },
+  { name: '纯黑', value: '#000000' },
+  { name: '纯白', value: '#ffffff' },
+  { name: '浅米色', value: '#f3ecdc' },
+]

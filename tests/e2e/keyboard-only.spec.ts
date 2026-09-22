@@ -76,3 +76,37 @@ test('space on a focused button activates that button instead of toggling playba
   await expect(page.getByRole('button', { name: '网格' })).toHaveAttribute('aria-pressed', 'false')
   await expect(page.getByRole('button', { name: '播放', exact: true })).toBeVisible()
 })
+
+test('display options can be changed without a mouse, each within two interactions (SC-001)', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  // 坐标轴: 1 次操作
+  await page.getByRole('button', { name: '坐标轴' }).focus()
+  expect(await focusIsVisible(page)).toBe(true)
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: '坐标轴' })).toHaveAttribute('aria-pressed', 'false')
+
+  // 其余选项: 展开面板 + 1 次操作
+  await page.getByText('画面', { exact: true }).focus()
+  expect(await focusIsVisible(page)).toBe(true)
+  await page.keyboard.press('Enter')
+  await page.getByRole('button', { name: '轨迹淡化' }).focus()
+  await page.keyboard.press(' ')
+  await expect(page.getByRole('button', { name: '轨迹淡化' })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: '播放', exact: true })).toBeVisible()
+
+  const select = page.getByRole('combobox', { name: '轨迹保留时长' })
+  await select.focus()
+  expect(await focusIsVisible(page)).toBe(true)
+  await select.selectOption({ label: '30 秒' })
+  await expect(select).toHaveValue('30')
+
+  await page.getByRole('button', { name: '纯白' }).focus()
+  expect(await focusIsVisible(page)).toBe(true)
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('textbox', { name: '十六进制颜色值' })).toHaveValue('#ffffff')
+  await page.getByRole('button', { name: '恢复默认' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: '默认深色' })).toHaveAttribute('aria-pressed', 'true')
+})

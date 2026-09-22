@@ -1,5 +1,5 @@
-import type { Vec2 } from '../core/types'
-import { drawFadingPolyline } from './drawEpicycles'
+import type { TrailPlan, Vec2 } from '../core/types'
+import { drawFadingPolyline, drawRetainedPolyline } from './drawEpicycles'
 import type { Ctx2D } from './drawGrid'
 
 const MAJOR_TICK_SECONDS = 5
@@ -19,6 +19,8 @@ export const drawWaveform = (
   viewport: Viewport,
   tip: Vec2 | null,
   theme: RenderTheme,
+  showBaseline = true,
+  plan?: TrailPlan,
 ): void => {
   const pixelsPerSecond = region.width / windowSeconds
   const count = trail.length / 3
@@ -27,15 +29,22 @@ export const drawWaveform = (
     y: viewport.toScreen({ x: 0, y: trail[index * 3 + 2] as number }).y,
   })
 
-  ctx.strokeStyle = theme.axis
-  ctx.lineWidth = 1
-  const baseline = Math.round(viewport.toScreen({ x: 0, y: 0 }).y) + 0.5
-  ctx.beginPath()
-  ctx.moveTo(region.x, baseline)
-  ctx.lineTo(region.x + region.width, baseline)
-  ctx.stroke()
+  // 零值基准线属于"坐标轴" (FR-010)
+  if (showBaseline) {
+    ctx.strokeStyle = theme.axis
+    ctx.lineWidth = 1
+    const baseline = Math.round(viewport.toScreen({ x: 0, y: 0 }).y) + 0.5
+    ctx.beginPath()
+    ctx.moveTo(region.x, baseline)
+    ctx.lineTo(region.x + region.width, baseline)
+    ctx.stroke()
+  }
 
-  drawFadingPolyline(ctx, count, pointAt, theme.trace)
+  if (plan?.mode === 'retained') {
+    drawRetainedPolyline(ctx, count, pointAt, (index) => trail[index * 3] as number, plan, theme)
+  } else {
+    drawFadingPolyline(ctx, count, pointAt, theme.trace)
+  }
 
   if (!tip) return
   const from = viewport.toScreen(tip)

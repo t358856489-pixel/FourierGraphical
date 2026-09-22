@@ -59,3 +59,20 @@ describe('ExportDialog', () => {
     expect(screen.getByRole('button', { name: '导出图片' })).toBeEnabled()
   })
 })
+
+describe('exports use the same palette as the stage (feature 002)', () => {
+  test('frameInput carries the display options and a theme derived from the chosen background', async () => {
+    const { frameInput } = await import('./ExportDialog')
+    const { derivePalette } = await import('../../render/palette')
+    const { readRenderTheme } = await import('../../render/theme')
+    const { useViewStore } = await import('../../state/viewStore')
+    useViewStore.getState().setBackground('#ffffff')
+    useViewStore.getState().toggle('trailFade')
+    useViewStore.getState().toggle('showAxes')
+
+    const input = frameInput()
+    expect(input.view).toMatchObject({ background: '#ffffff', trailFade: false, showAxes: false })
+    expect(input.theme).toEqual(derivePalette('#ffffff', readRenderTheme(document.documentElement)))
+    expect(input.theme.background).toBe('#ffffff')
+  })
+})

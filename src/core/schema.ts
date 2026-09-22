@@ -6,6 +6,7 @@ import {
   MAX_NAME_LENGTH,
   MIN_LOOP_SECONDS,
   SPEED_RANGE,
+  TRAIL_RETENTION_OPTIONS,
   TRAIL_SECONDS_RANGE,
   rangeOf,
 } from './ranges'
@@ -98,7 +99,25 @@ const loopSchema = z
   .strictObject({ start: nonNegative, end: nonNegative, enabled: z.boolean() })
   .refine((loop) => loop.end - loop.start >= MIN_LOOP_SECONDS, '循环区间过短')
 
-const viewSchema = z.strictObject({
+const HEX_COLOR = /^#[0-9a-f]{6}$/
+
+// 功能 001 写出的草稿没有这些字段: 先补默认值, 再走严格校验.
+// 坐标轴沿用旧的"网格"开关——升级前两者同显同隐, 升级后画面不应突然多出坐标轴.
+const withDisplayDefaults = (input: unknown): unknown => {
+  if (typeof input !== 'object' || input === null) return input
+  const view = input as Record<string, unknown>
+  // 只有"缺失"才补默认值; 显式写入的 null 等非法值照常交给严格校验去拒绝
+  const orDefault = (key: string, fallback: unknown) => (view[key] === undefined ? fallback : view[key])
+  return {
+    ...view,
+    showAxes: orDefault('showAxes', view['showGrid']),
+    trailFade: orDefault('trailFade', true),
+    trailRetention: orDefault('trailRetention', 'all'),
+    background: orDefault('background', null),
+  }
+}
+
+const strictViewSchema = z.strictObject({
   zoom: z.union([z.literal('auto'), finite.refine((zoom) => zoom > 0, '缩放必须为正数')]),
   pan: z.strictObject({ x: finite, y: finite }),
   showVectors: z.boolean(),
@@ -111,7 +130,13 @@ const viewSchema = z.strictObject({
   ),
   highlightedComponentId: z.string().nullable(),
   selectedComponentId: z.string().nullable(),
+  showAxes: z.boolean(),
+  trailFade: z.boolean(),
+  trailRetention: z.union(TRAIL_RETENTION_OPTIONS.map((option) => z.literal(option))),
+  background: z.string().regex(HEX_COLOR).nullable(),
 })
+
+const viewSchema = z.preprocess(withDisplayDefaults, strictViewSchema)
 
 export const draftSchema = z.strictObject({
   function: fourierFunctionSchema,
