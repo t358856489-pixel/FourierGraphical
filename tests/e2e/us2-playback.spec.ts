@@ -8,8 +8,11 @@ test('plays automatically on open, pauses, and resumes from the same moment', as
 
   await page.getByRole('button', { name: '暂停', exact: true }).click()
   const paused = await currentTime(page)
-  const frozen = await stillShot(page)
-  expect(await stillShot(page)).toBe(frozen)
+  // 暂停后画面不再变化: 连续两张一致. 用轮询是因为紧跟暂停的第一张可能赶在最后一帧合成之前;
+  // 如果动画并未停止, 这个条件永远无法满足
+  await expect
+    .poll(async () => (await stillShot(page)) === (await stillShot(page)))
+    .toBe(true)
 
   await page.getByRole('button', { name: '播放', exact: true }).click()
   await expect.poll(() => currentTime(page)).toBeGreaterThan(paused)
@@ -63,14 +66,31 @@ test('a loop region wraps playback and an invalid one is refused', async ({ page
   await expect(page.getByRole('textbox', { name: '循环终点' })).toHaveValue('2.5')
 
   await page.getByRole('button', { name: '播放', exact: true }).click()
-  const samples: number[] = []
-  await expect
-    .poll(async () => {
-      samples.push(await currentTime(page))
-      return samples.length >= 2 && (samples.at(-1) ?? 0) < (samples.at(-2) ?? 0)
-    })
-    .toBe(true)
-  expect(Math.max(...samples)).toBeLessThan(2.5)
+  // 在页面内逐帧观察. 不能用 expect.poll 从外部采样: 它的间隔会退避到 1000 ms,
+  // 恰好是 0.5 秒循环长度的整数倍, 采样混叠后永远看不到回绕
+  const observed = await page.evaluate(
+    () =>
+      new Promise<{ wrapped: boolean; max: number; min: number }>((resolve) => {
+        const readout = document.querySelector('[data-testid="time-readout"]') as HTMLElement
+        const started = performance.now()
+        let previous = Number(readout.dataset['time'])
+        let max = previous
+        let min = previous
+        const frame = () => {
+          const now = Number(readout.dataset['time'])
+          max = Math.max(max, now)
+          min = Math.min(min, now)
+          if (now < previous) return resolve({ wrapped: true, max, min })
+          if (performance.now() - started > 4000) return resolve({ wrapped: false, max, min })
+          previous = now
+          requestAnimationFrame(frame)
+        }
+        requestAnimationFrame(frame)
+      }),
+  )
+  expect(observed.wrapped).toBe(true)
+  expect(observed.max).toBeLessThan(2.5)
+  expect(observed.min).toBeGreaterThanOrEqual(2)
 })
 
 test('editing a parameter during playback does not interrupt the animation', async ({ page }) => {

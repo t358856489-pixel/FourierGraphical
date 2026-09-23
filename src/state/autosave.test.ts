@@ -102,3 +102,22 @@ describe('restoreDraft', () => {
     expect(useToastStore.getState().messages[0]?.text).toContain('已损坏')
   })
 })
+
+describe('display options in the draft (feature 002)', () => {
+  test('are written after a change and restored on the next start', async () => {
+    useViewStore.getState().toggle('showAxes')
+    useViewStore.getState().toggle('trailFade')
+    useViewStore.getState().setTrailRetention(30)
+    useViewStore.getState().setBackground('#ffffff')
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS)
+    resetStores()
+
+    expect(await restoreDraft()).toBe(true)
+    expect(useViewStore.getState()).toMatchObject({
+      showAxes: false,
+      trailFade: false,
+      trailRetention: 30,
+      background: '#ffffff',
+    })
+  })
+})

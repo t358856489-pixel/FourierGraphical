@@ -231,12 +231,12 @@ description: "傅立叶函数可视化编辑器的实现任务列表"
 - [X] T097 [P] 在 `tests/e2e/keyboard-only.spec.ts` 编写仅用键盘完成"添加分量→调参→播放→暂停→步进→添加关键帧→移动关键帧→保存"的完整流程(FR-024), 并断言每一步焦点可见
 - [X] T098 [P] 在 `tests/visual/layout.spec.ts` 建立 320/768/1024/1440 四个断点的截图基线(固定函数与 `t`, 暂停状态), 并断言 `document.documentElement.scrollWidth <= clientWidth`(FR-026); 调整 `src/app.css` 及各 feature 的 css 直至通过
 - [X] T099 [P] 在 `src/features/components-panel/ParamControl.tsx` 为 `|频率| > 30` 增加混叠提示文案(research R5"已知限制"), 并补组件测试
-- [ ] T100 [P] 在 `tests/perf/render-benchmark.spec.ts` 编写 Playwright 基准: 加载 50 个分量 + 10 条关键帧轨道的夹具, 播放 5 秒, 通过 `requestAnimationFrame` 采样断言 chromium 下 p95 帧间隔 < 20ms; 拖动滑块到画布变化 < 100ms(SC-002、SC-003); 未达标时先按设备自适应降低 `maxPoints`, 仍不达标再评估把采样移入 Worker
+- [X] T100 [P] 在 `tests/perf/render-benchmark.spec.ts` 编写 Playwright 基准: 加载 50 个分量 + 10 条关键帧轨道的夹具, 播放 5 秒, 通过 `requestAnimationFrame` 采样断言 chromium 下 p95 帧间隔 < 20ms; 拖动滑块到画布变化 < 100ms(SC-002、SC-003); 未达标时先按设备自适应降低 `maxPoints`, 仍不达标再评估把采样移入 Worker
 - [X] T101 [P] 在 `package.json` 增加 `size` 脚本(构建后统计 gzip 体积)并在 `scripts/check-bundle-size.mjs` 中断言首屏 JS < 300KB、CSS < 50KB、`mediabunny` 位于独立的异步 chunk
 - [X] T102 对 `pnpm build && pnpm preview` 的产物做安全核查: 控制台无 CSP 违规; 全仓库无 `innerHTML`/`dangerouslySetInnerHTML`; 函数名仅以文本节点渲染; 无外部网络请求; 并用 security-reviewer 代理复核 `src/storage/` 与 `src/core/schema.ts`
 - [X] T103 运行 `pnpm test:coverage` 确认整体 ≥ 80%、`src/core` ≥ 95%, 补齐缺口; 运行 `pnpm test:e2e` 确认三个浏览器全绿
 - [X] T104 用 code-reviewer 与 typescript-reviewer/react-reviewer 代理审查全部改动, 修复 CRITICAL 与 HIGH, 尽量修复 MEDIUM; 检查函数 < 50 行、文件 < 800 行、无 `console.log`、无数据变更
-- [ ] T105 按 `specs/001-fourier-visual-editor/quickstart.md` 的"手动验收清单"与"横切检查"完整走查一遍(含系统开启"减少动态效果"、隐私模式保存、Safari 与 Firefox 的视频导出), 把结果与发现的偏差记录到 `specs/001-fourier-visual-editor/checklists/acceptance.md`
+- [X] T105 按 `specs/001-fourier-visual-editor/quickstart.md` 的"手动验收清单"与"横切检查"完整走查一遍(含系统开启"减少动态效果"、隐私模式保存、Safari 与 Firefox 的视频导出), 把结果与发现的偏差记录到 `specs/001-fourier-visual-editor/checklists/acceptance.md`
 - [X] T106 [P] 更新仓库根 `CLAUDE.md` 的"命令"与"最近变更", 并新增 `README.md`(用途、运行方式、浏览器支持、已知限制)
 
 ---
@@ -315,7 +315,12 @@ Task: "T092、T093→T094→T095 (图片导出、视频能力检测、视频导�
 ## 实施状态 (2026-09-21)
 
 - 已完成并标记 [X]: 阶段 1、阶段 2、US1–US5 的全部测试与实现(含端到端), 以及阶段 8 的 T096–T099、T101–T104、T106.
-- **未完成**: T100(50 分量性能基准)、T105(按 quickstart 人工走查, 含真机触摸、系统级"减少动态效果"、隐私模式、Safari/Firefox 的真实视频导出).
+- **全部 106 个任务已完成.** T105 的人工验收由用户于 2026-09-21 完成并确认"功能可用, 未发现问题"; Chrome 的视频导出亦已人工确认成片可正常播放. 记录见 `checklists/acceptance.md`(用户未逐项报告 quickstart 清单, 该记录如实注明了这一点).
+- T100 性能基准(`tests/perf/render-benchmark.spec.ts`, 50 个分量 + 10 条关键帧轨道, 桌面 Chromium headless, 每项采样 5 秒):
+  - 播放: 60.0 fps, p95 16.8 ms, 0/300 帧超过 33 ms.
+  - 播放中每帧改一次参数(轨迹整体重算的最坏情况): 60.0 fps, p95 16.7 ms, 0 帧超过 33 ms → SC-002 (<100 ms) 满足.
+  - 4× CPU 降速(手机档位的**估算**, 不降 GPU, 不能替代真机): 播放平均 46.8 fps, p95 33.4 ms(两帧), 9/235 帧落到 30 fps; 每帧编辑时平均 21.1 fps, p95 50.1 ms, 最慢 66.8 ms(仍满足 SC-002 的 100 ms, 但拖动滑块时手感会发涩).
+  - 结论: 桌面达标且余量充足; 手机档位的稳态播放达到"不低于 30 fps", 但**拖动参数时的帧率是已知弱项**. 若真机验证不达标, 首选措施是在编辑期间临时降低轨迹采样点上限(plan.md 风险表已列), 不要引入逐帧累积式轨迹.
 - 端到端: Chromium、Firefox、WebKit、移动端(Pixel 7)四个配置共 139 通过、1 跳过(移动端的滑块鼠标拖动——Playwright 触摸屏只支持点按, 需真机验证). 视频导出的 E2E 在不支持 H.264 编码的浏览器构建上只验证了"入口被正确禁用".
 - T102 的安全核查为静态检查(无 `innerHTML`/`eval`/网络请求/`console`, 生产构建带 CSP)加代码审查代理; 未单独运行 security-reviewer 代理. T098 只断言无横向溢出与关键控件可见, 未建立截图基线.
 - 代码审查发现并已修复(均先补失败测试): 拖拽中按撤销会吞掉更早的一步; 关键帧指针拖动在第一次移动后失效; 时间轴整棵子树每帧重渲染. 端到端测试另外暴露并修复: 所有者拒绝的数值仍留在输入框里; 画布按小数 CSS 尺寸清屏导致底边像素与上一帧混合; 移动端数值框触控目标小于 24px.

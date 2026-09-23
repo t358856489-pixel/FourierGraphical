@@ -1,8 +1,15 @@
 import { create } from 'zustand'
 import { DEFAULT_TRAIL_SECONDS } from '../core/ranges'
-import type { Vec2, ViewSettings } from '../core/types'
+import { parseUserColor } from '../core/color'
+import { ok, type Result, type TrailRetention, type Vec2, type ViewSettings } from '../core/types'
 
-export type DisplayToggle = 'showVectors' | 'showCircles' | 'showTrail' | 'showGrid'
+export type DisplayToggle =
+  | 'showVectors'
+  | 'showCircles'
+  | 'showTrail'
+  | 'showGrid'
+  | 'showAxes'
+  | 'trailFade'
 
 export const INITIAL_VIEW: ViewSettings = {
   zoom: 'auto',
@@ -12,6 +19,10 @@ export const INITIAL_VIEW: ViewSettings = {
   showTrail: true,
   showGrid: true,
   trailSeconds: DEFAULT_TRAIL_SECONDS,
+  showAxes: true,
+  trailFade: true,
+  trailRetention: 'all',
+  background: null,
   highlightedComponentId: null,
   selectedComponentId: null,
 }
@@ -24,6 +35,9 @@ interface ViewActions {
   readonly setZoomPan: (zoom: number, pan: Vec2) => void
   readonly fitView: () => void
   readonly setTrailSeconds: (seconds: number) => void
+  readonly setTrailRetention: (retention: TrailRetention) => void
+  /** null 恢复默认背景; 非法输入返回错误且不改变状态 (FR-020) */
+  readonly setBackground: (input: string | null) => Result<string | null>
   readonly highlight: (componentId: string | null) => void
   readonly select: (componentId: string | null) => void
   readonly restore: (view: ViewSettings) => void
@@ -37,6 +51,16 @@ export const useViewStore = create<ViewSettings & ViewActions>()((set) => ({
   setZoomPan: (zoom, pan) => set({ zoom, pan }),
   fitView: () => set({ zoom: 'auto', pan: { x: 0, y: 0 } }),
   setTrailSeconds: (trailSeconds) => set({ trailSeconds }),
+  setTrailRetention: (trailRetention) => set({ trailRetention }),
+  setBackground: (input) => {
+    if (input === null) {
+      set({ background: null })
+      return ok(null)
+    }
+    const parsed = parseUserColor(input)
+    if (parsed.ok) set({ background: parsed.value })
+    return parsed
+  },
   highlight: (highlightedComponentId) => set({ highlightedComponentId }),
   select: (selectedComponentId) => set({ selectedComponentId }),
   restore: (view) => set(view),
@@ -52,6 +76,10 @@ export const selectViewSettings = (
   showTrail: state.showTrail,
   showGrid: state.showGrid,
   trailSeconds: state.trailSeconds,
+  showAxes: state.showAxes,
+  trailFade: state.trailFade,
+  trailRetention: state.trailRetention,
+  background: state.background,
   highlightedComponentId: state.highlightedComponentId ?? state.hoveredComponentId ?? null,
   selectedComponentId: state.selectedComponentId,
 })

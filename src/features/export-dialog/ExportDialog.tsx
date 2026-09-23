@@ -12,6 +12,7 @@ import {
   type VideoResolution,
 } from '../../export/exportVideo'
 import { detectVideoSupport, type VideoSupport } from '../../export/videoSupport'
+import { derivePalette } from '../../render/palette'
 import { readRenderTheme } from '../../render/theme'
 import { selectFunction, useDocumentStore } from '../../state/documentStore'
 import { usePlaybackStore } from '../../state/playbackStore'
@@ -24,12 +25,16 @@ import './export-dialog.css'
 const BOUND_RANGE: Range = { min: 0, max: 1e6, step: 0.01, unit: '秒' }
 const DEFAULT_OUTPUT_SECONDS = 10
 
-const frameInput = (): Omit<FrameInput, 't'> => ({
-  fn: selectFunction(useDocumentStore.getState()),
-  view: { ...selectViewSettings(useViewStore.getState()), highlightedComponentId: null },
-  size: getStageSize(),
-  theme: readRenderTheme(document.documentElement),
-})
+// 与舞台循环用同一个 derivePalette: 成片的背景与线条配色和画面一致 (FR-022)
+export const frameInput = (): Omit<FrameInput, 't'> => {
+  const view = { ...selectViewSettings(useViewStore.getState()), highlightedComponentId: null }
+  return {
+    fn: selectFunction(useDocumentStore.getState()),
+    view,
+    size: getStageSize(),
+    theme: derivePalette(view.background, readRenderTheme(document.documentElement)),
+  }
+}
 
 const fileStem = (): string => selectFunction(useDocumentStore.getState()).name.replace(/[\\/:*?"<>|]/g, '_')
 

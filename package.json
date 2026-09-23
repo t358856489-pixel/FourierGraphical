@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
     "format": "prettier --write .",
-    "size": "pnpm build && node scripts/check-bundle-size.mjs"
+    "size": "pnpm build && node scripts/check-bundle-size.mjs",
+    "test:perf": "PERF=1 playwright test tests/perf --project=chromium --workers=1"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

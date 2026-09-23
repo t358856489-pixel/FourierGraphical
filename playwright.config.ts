@@ -5,6 +5,8 @@ const PREVIEW_PORT = 4173
 export default defineConfig({
   testDir: 'tests',
   testMatch: /.*\.spec\.ts/,
+  // 性能基准与其他测试并行会互相干扰, 用 `pnpm test:perf` 单独串行运行
+  testIgnore: process.env['PERF'] ? [] : ['**/perf/**'],
   fullyParallel: true,
   reporter: 'list',
   snapshotPathTemplate: 'tests/visual/__screenshots__/{projectName}/{arg}{ext}',

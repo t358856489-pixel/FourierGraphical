@@ -3,7 +3,7 @@
   min-height: 0;
   height: 100%;
   overflow: hidden;
-  background: var(--screen-bg);
+  background: var(--stage-bg, var(--screen-bg));
   border-radius: var(--radius-screen);
   box-shadow: var(--shadow-screen);
 }
@@ -38,6 +38,11 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   text-align: center;
-  color: var(--screen-text);
+  color: var(--stage-text, var(--screen-text));
   pointer-events: none;
+}
+
+/* 自定义背景时去掉荧光屏的暗角与扫描线: 它们只为默认的深色屏设计, 且不会出现在导出的成片里 */
+.stage[data-custom-background='true']::after {
+  display: none;
 }

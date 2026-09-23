@@ -65,7 +65,7 @@ test('disabling removes a contribution, re-enabling restores it, deleting all sh
   await enable.uncheck()
   expect(await stillShot(page)).not.toBe(full)
   await enable.check()
-  expect(await stillShot(page)).toBe(full)
+  await expect.poll(() => stillShot(page)).toBe(full)
 
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: '删除分量 1' }).click()
   await expect(page.getByText(/没有启用的分量/)).toBeVisible()
@@ -102,5 +102,5 @@ test('switching the presentation mode keeps the components and the time', async 
   await expect(page.getByTestId('time-readout')).toHaveText('4.50')
   expect(await stillShot(page)).not.toBe(waveform)
   await page.getByText('波形', { exact: true }).click()
-  expect(await stillShot(page)).toBe(waveform)
+  await expect.poll(() => stillShot(page)).toBe(waveform)
 })

@@ -31,10 +31,13 @@ pnpm dev | pnpm test | pnpm test:coverage | pnpm test:e2e | pnpm lint | pnpm typ
 - 所有领域数据不可变; `src/core/` 只写纯函数, 可失败操作返回 `Result<T>` 而不抛异常
 - 图形必须是 `(函数, 时刻 t)` 的纯函数: 禁止逐帧累加角度或轨迹 (见 specs/001-fourier-visual-editor/research.md R4、R5)
 - 画布由 requestAnimationFrame 直接订阅 store 绘制, 不经过 React 渲染
+- 保留的轨迹同样是纯函数: 由 `planTrail(fn, t, view, mode)` 算出区间与步长, 不累积; "正常亮度"用不透明混色而非 globalAlpha (specs/002-canvas-display-options/research.md R1–R4)
+- 默认显示设置下的画面必须与功能 001 逐像素一致; 任意背景色下线条对比度 ≥ 3:1、文字 ≥ 4.5:1
 - 严格 TDD; 覆盖率整体 ≥ 80%, `src/core` ≥ 95%
 - 单文件 < 800 行, 单函数 < 50 行; 按功能而非文件类型组织
 
 ## 最近变更
+- 002-canvas-display-options: 已实现(网格/坐标轴分离、轨迹保留、背景色). 不新增依赖. 新增纯函数模块 `core/color`、`core/trailPlan`、`render/palette`; 显示选项只进 `ViewSettings`(应用级偏好), 已保存函数的格式不变
 - 001-fourier-visual-editor: 新增实施计划(规范、研究、数据模型、契约、quickstart)
 
 <!-- 手动添加内容开始 -->
