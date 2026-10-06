@@ -12,7 +12,7 @@ export const MIN_LOOP_SECONDS = 0.1
 export const MAX_WALL_DELTA_SECONDS = 0.25
 export const MIN_TIMELINE_SECONDS = 10
 
-export const MAX_COMPONENTS = 50
+export const MAX_COMPONENTS = 200
 export const MAX_KEYFRAMES = 50
 export const MAX_HISTORY = 50
 export const MAX_NAME_LENGTH = 60
@@ -83,3 +83,23 @@ export const BACKGROUND_PRESETS: readonly { readonly name: string; readonly valu
   { name: '纯白', value: '#ffffff' },
   { name: '浅米色', value: '#f3ecdc' },
 ]
+
+// —— 功能 003: 从图形得到傅立叶函数 ——
+export const SHAPE_SAMPLE_COUNT = 1024
+export const SHAPE_SAMPLE_MAX = 4096
+export const SHAPE_TARGET_EXTENT = 2
+export const SHAPE_MIN_AMPLITUDE = 1e-4
+export const SHAPE_DEFAULT_COUNT = 60
+/** 频率索引上限: |n|·基频 不得超过 FREQUENCY_RANGE.max, 否则生成的函数无法保存 */
+export const SHAPE_MAX_HARMONIC = Math.floor(FREQUENCY_RANGE.max / PRESET_BASE_FREQUENCY)
+export const DRAW_RESAMPLE_COUNT = 512
+export const DRAW_MIN_POINTS = 20
+export const DRAW_MIN_EXTENT_RATIO = 0.05
+export const DRAW_DEFAULT_SMOOTHING = 25
+export const DRAW_MAX_SMOOTH_HALF_WINDOW = 12
+export const SVG_MAX_BYTES = 2 * 1024 * 1024
+export const SVG_MAX_POINTS = 100_000
+export const SVG_YIELD_EVERY = 5_000
+/** 轨迹采样的求值预算(采样点 × 分量数): 点数预算 = 预算 ÷ 启用分量数 */
+export const TRAIL_EVALUATION_BUDGET = 2_000_000
+export const TRAIL_FADING_EVALUATION_BUDGET = 400_000

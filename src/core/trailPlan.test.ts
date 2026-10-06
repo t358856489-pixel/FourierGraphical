@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { sampleTrail, trailStep } from './evaluator'
-import { createDefaultFunction, updateTrack } from './function'
+import { addComponent, createDefaultFunction, updateTrack } from './function'
 import {
   DEFAULT_MAX_TRAIL_POINTS,
   HIGHLIGHT_SECONDS,
@@ -179,5 +179,24 @@ describe('planTrail invariants across the whole frequency range', () => {
       ),
       { numRuns: 200 },
     )
+  })
+})
+
+describe('sampling budgets scale with the component count (feature 003)', () => {
+  const many = (count: number) => {
+    let fn = withFrequencies(1.23456, 0.6, 1)
+    while (fn.components.length < count) {
+      const added = addComponent(fn)
+      if (!added.ok) throw new Error(added.error.message)
+      fn = added.value
+    }
+    return fn
+  }
+  test('retained point budget is 40000 / (components / 50), capped at 40000', () => {
+    const plan200 = planTrail(many(200), 600, retained(), 'drawing2d')
+    expect(pointsOf(plan200)).toBeLessThanOrEqual(10_000 + 2)
+    const plan3 = planTrail(withFrequencies(1.23456, 0.6, 1), 600, retained(), 'drawing2d')
+    expect(pointsOf(plan3)).toBeLessThanOrEqual(RETAINED_TRAIL_POINT_BUDGET + 2)
+    expect(pointsOf(plan3)).toBeGreaterThan(10_000)
   })
 })

@@ -1,0 +1,125 @@
+.shape-dialog__tabs {
+  display: inline-flex;
+  margin-bottom: var(--space-4);
+  padding: 2px;
+  background: var(--panel-sunken);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sunken);
+}
+
+.shape-dialog__tab {
+  padding: var(--space-1) var(--space-6);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 2px;
+}
+
+.shape-dialog__tab[aria-selected='true'] {
+  font-weight: 600;
+  color: var(--screen-trace);
+  background: var(--bezel);
+}
+
+.shape-dialog__close {
+  margin-top: var(--space-4);
+}
+
+.shape-library {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shape-library__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+/* 缩略图画在小块荧光屏上, 与画布同一语言 */
+.shape-library__item {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--ink);
+  cursor: pointer;
+  background: var(--panel-raised);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-raised);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.shape-library__item svg {
+  color: var(--screen-trace);
+  background: var(--screen-bg);
+  border-radius: var(--radius-panel);
+}
+
+.shape-library__item:hover {
+  border-color: var(--ink-soft);
+}
+
+.shape-library__item:active {
+  transform: translateY(1px);
+}
+
+.shape-library__item[aria-pressed='true'] {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.shape-library__count {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 3ch;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .shape-library__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.import-panel {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.import-panel__dropzone {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  text-align: center;
+  border: 1px dashed var(--ink-soft);
+  border-radius: var(--radius-panel);
+}
+
+.import-panel__dropzone p {
+  margin: 0;
+}
+
+.import-panel__hint,
+.import-panel__status,
+.import-panel__note {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.import-panel__error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+
+.import-panel__progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--accent);
+}

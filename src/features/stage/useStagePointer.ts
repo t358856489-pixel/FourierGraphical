@@ -8,6 +8,7 @@ import { layoutRegions, type FrameSize } from '../../render/drawFrame'
 import { createViewport, type Viewport } from '../../render/viewport'
 import { selectFunction, useDocumentStore } from '../../state/documentStore'
 import { usePlaybackStore } from '../../state/playbackStore'
+import { useDrawingStore } from '../../state/drawingStore'
 import { useViewStore } from '../../state/viewStore'
 import { showError } from '../../ui/toastStore'
 import { hitTestLink, pointerToAmplitudePhase } from './vectorDrag'
@@ -56,7 +57,11 @@ export const useStagePointer = (
     if (!result.ok) showError(result.error.message)
   }
 
+  // 绘制模式下指针事件归绘制层, 这里的拖拽与缩放全部让出 (功能 003 FR-012)
+  const isDrawing = () => useDrawingStore.getState().isActive
+
   const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (isDrawing()) return
     const canvas = canvasRef.current
     if (!canvas) return
     const pointer = pointerIn(event, canvas)
@@ -77,6 +82,7 @@ export const useStagePointer = (
   }
 
   const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (isDrawing()) return
     const canvas = canvasRef.current
     const active = gesture.current
     if (!canvas || !active) return
@@ -106,6 +112,7 @@ export const useStagePointer = (
   }
 
   const onWheel = (event: WheelEvent<HTMLCanvasElement>) => {
+    if (isDrawing()) return
     const canvas = canvasRef.current
     if (!canvas) return
     const view = useViewStore.getState()

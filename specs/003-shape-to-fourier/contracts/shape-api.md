@@ -45,7 +45,7 @@ smooth(path: ShapePath, smoothing: number): ShapePath              // 0 → 原�
 ## 4. `core/shape/svg`
 ```ts
 parseSvg(text: string, maxPoints?: number): ImportResult
-parsePathData(d: string): Result<readonly Vec2[]>                  // 展平后的折线
+parsePathData(d: string, onPoints?: (count: number) => void): Result<readonly Vec2[]>  // 展平后的折线; 每条命令后同步报告累计点数, 供导入层分段报告进度
 ```
 | 契约 | 需求 |
 |---|---|
@@ -53,6 +53,7 @@ parsePathData(d: string): Result<readonly Vec2[]>                  // 展平后�
 | `<polygon>`、`<rect>`、`<circle>`、`<ellipse>` 等价转换; `transform` 链应用 | FR-015 |
 | 多路径取最长, `pathCount` 与 `warnings` 报告 | FR-015 |
 | 10 万点的生成样本在 3 秒内完成解析与转换, 进度回调被调用 ≥ 10 次 | FR-018, 分析 E1 |
+| 圆弧半径极小/极大(如 `1e-200`、`1e200`)导致中间量非有限 → 该段退化为直线到终点, 所有输出点有限, 后续命令照常 | FR-017 |
 | 非 SVG / > 2 MB / > 100 000 点 → `IMPORT_UNSUPPORTED`; 畸形 `d`(`M 1`、`X 0 0`、`1e999`)→ `DATA_CORRUPT`; 无路径 → `NOT_FOUND`; **永不抛异常** | FR-017 |
 | 含 `<script>`、`onload`、外部 `<image href>` 的文件: 解析完成且没有任何脚本执行或网络请求(测试中监听) | 安全 |
 

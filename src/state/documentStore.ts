@@ -13,13 +13,14 @@ import {
   updateTrack,
 } from '../core/function'
 import { commit, createHistory, redo, undo } from '../core/history'
-import { rangeOf } from '../core/ranges'
+import { MAX_COMPONENTS, rangeOf } from '../core/ranges'
 import { addKeyframe, moveKeyframe, removeKeyframe, setEasing, setValueAt } from '../core/tracks'
 import {
   err,
   ok,
   type FourierFunction,
   type Easing,
+  type HarmonicComponent,
   type History,
   type ParamName,
   type ParamTrack,
@@ -56,7 +57,11 @@ interface DocumentActions {
     edit: (track: ParamTrack) => Result<ParamTrack>,
     mode: EditMode,
   ) => Result<FourierFunction>
-  readonly addKeyframe: (componentId: string, param: ParamName, t: number) => Result<FourierFunction>
+  readonly addKeyframe: (
+    componentId: string,
+    param: ParamName,
+    t: number,
+  ) => Result<FourierFunction>
   readonly moveKeyframe: (
     componentId: string,
     param: ParamName,
@@ -76,6 +81,11 @@ interface DocumentActions {
     easing: Easing,
   ) => Result<FourierFunction>
   readonly addComponent: () => Result<FourierFunction>
+  /** 用生成的分量替换全部分量并切到二维绘图, 一步可撤销 (功能 003 FR-006) */
+  readonly applyGenerated: (
+    components: readonly HarmonicComponent[],
+    mode?: EditMode,
+  ) => Result<FourierFunction>
   readonly applyPreset: (preset: PresetId, count: number, mode: EditMode) => Result<FourierFunction>
   readonly removeComponent: (componentId: string) => void
   readonly setEnabled: (componentId: string, enabled: boolean) => void
@@ -83,7 +93,11 @@ interface DocumentActions {
   readonly setPresentationMode: (mode: PresentationMode) => void
   readonly undo: () => void
   readonly redo: () => void
-  readonly loadFunction: (fn: FourierFunction, isDirty: boolean, savedFunctionId?: string | null) => void
+  readonly loadFunction: (
+    fn: FourierFunction,
+    isDirty: boolean,
+    savedFunctionId?: string | null,
+  ) => void
   readonly rename: (name: string) => Result<FourierFunction>
   readonly markSaved: (fn: FourierFunction) => void
   readonly hasUnsavedChanges: () => boolean
@@ -136,7 +150,12 @@ export const useDocumentStore = create<DocumentState & DocumentActions>()((set, 
   },
 
   setParamValue: (componentId, param, value, t, mode) =>
-    get().editTrack(componentId, param, (track) => setValueAt(track, t, value, rangeOf(param)), mode),
+    get().editTrack(
+      componentId,
+      param,
+      (track) => setValueAt(track, t, value, rangeOf(param)),
+      mode,
+    ),
 
   addKeyframe: (componentId, param, t) =>
     get().editTrack(componentId, param, (track) => addKeyframe(track, t, rangeOf(param)), 'commit'),
@@ -154,6 +173,15 @@ export const useDocumentStore = create<DocumentState & DocumentActions>()((set, 
     const result = addComponent(get().history.present)
     if (result.ok) get().applyEdit(result.value, 'commit')
     return result
+  },
+
+  applyGenerated: (components, mode = 'commit') => {
+    if (components.length > MAX_COMPONENTS) {
+      return err('COMPONENT_LIMIT', `最多 ${MAX_COMPONENTS} 个分量`)
+    }
+    const next = setPresentationMode({ ...get().history.present, components }, 'drawing2d')
+    get().applyEdit(next, mode)
+    return ok(next)
   },
 
   applyPreset: (preset, count, mode) => {

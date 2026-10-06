@@ -64,9 +64,9 @@ describe('documentStore', () => {
 
   test('adding beyond the component limit reports the error', () => {
     let last = store().addComponent()
-    for (let i = 0; i < 60 && last.ok; i++) last = store().addComponent()
+    for (let i = 0; i < 210 && last.ok; i++) last = store().addComponent()
     expect(last.ok === false && last.error.code).toBe('COMPONENT_LIMIT')
-    expect(store().history.present.components).toHaveLength(50)
+    expect(store().history.present.components).toHaveLength(200)
   })
 
   test('tracks unsaved changes against the last saved reference', () => {
@@ -124,5 +124,29 @@ describe('documentStore: actions arriving while a drag preview is open', () => {
     expect(amplitudeOf()).toEqual(constant(2))
     store().undo()
     expect(amplitudeOf()).not.toEqual(constant(2))
+  })
+})
+
+describe('applyGenerated (feature 003)', () => {
+  test('replaces every component, switches to 2D drawing, and is one undoable step', () => {
+    const id = firstId()
+    store().addKeyframe(id, 'amplitude', 1)
+    const before = store().history.present
+    const generated = store().history.present.components.slice(0, 2).map((c, i) => ({ ...c, id: `g${i}` }))
+    const result = store().applyGenerated(generated)
+    expect(result.ok).toBe(true)
+    expect(store().history.present.components.map((c) => c.id)).toEqual(['g0', 'g1'])
+    expect(store().history.present.presentationMode).toBe('drawing2d')
+    store().undo()
+    // 撤销恢复分量(含关键帧); 呈现模式是视图行为, 按功能 002 的规则不随撤销改变
+    expect(store().history.present.components).toBe(before.components)
+    expect(store().history.present.presentationMode).toBe('drawing2d')
+  })
+
+  test('refuses more than the component limit', () => {
+    const c = store().history.present.components[0]
+    if (!c) throw new Error('fixture')
+    const result = store().applyGenerated(Array.from({ length: 201 }, (_, i) => ({ ...c, id: `g${i}` })))
+    expect(result.ok === false && result.error.code).toBe('COMPONENT_LIMIT')
   })
 })

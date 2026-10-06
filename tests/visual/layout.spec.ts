@@ -31,6 +31,18 @@ for (const width of WIDTHS) {
     }
     await page.getByText('画面', { exact: true }).click()
 
+    // 功能 003: 图形对话框与绘制模式的控件也不得越出视口
+    await page.getByRole('button', { name: '图形', exact: true }).click()
+    for (const control of [page.getByRole('button', { name: '雪花' }), page.getByRole('tab', { name: '导入' })]) {
+      const rect = await control.boundingBox()
+      expect(rect && rect.x >= 0 && rect.x + rect.width <= width).toBe(true)
+    }
+    await page.getByRole('tab', { name: '手绘' }).click()
+    await page.getByRole('button', { name: '开始绘制' }).click()
+    const toolbar = await page.getByRole('toolbar', { name: '手绘工具' }).boundingBox()
+    expect(toolbar && toolbar.x >= 0 && toolbar.x + toolbar.width <= width).toBe(true)
+    await page.getByRole('button', { name: '退出绘制' }).click()
+
     for (const name of ['播放', '保存', '导出']) {
       const button = page.getByRole('button', { name, exact: true })
       await button.scrollIntoViewIfNeeded()

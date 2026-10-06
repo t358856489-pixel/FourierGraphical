@@ -57,10 +57,11 @@ describe('ComponentsPanel', () => {
     expect(doc().present.components[0]?.enabled).toBe(false)
 
     await userEvent.click(screen.getByRole('button', { name: '下移分量 1' }))
-    expect(doc().present.components.map((component) => component.id).slice(0, 2)).toEqual([
-      secondId,
-      firstId,
-    ])
+    expect(
+      doc()
+        .present.components.map((component) => component.id)
+        .slice(0, 2),
+    ).toEqual([secondId, firstId])
     expect(screen.getByRole('button', { name: '上移分量 1' })).toBeDisabled()
 
     await userEvent.click(screen.getByRole('button', { name: '删除分量 1' }))
@@ -92,5 +93,17 @@ describe('ComponentsPanel', () => {
     const id = doc().present.components[1]?.id
     await userEvent.click(within(row).getByRole('button', { name: '高亮分量 2' }))
     expect(useViewStore.getState().highlightedComponentId).toBe(id)
+  })
+})
+
+describe('ComponentsPanel with many components (feature 003)', () => {
+  test('virtualises the list at 200 components and keeps the count readout complete', () => {
+    const result = useDocumentStore.getState().applyPreset('square', 200, 'commit')
+    expect(result.ok).toBe(true)
+    render(<ComponentsPanel />)
+    expect(screen.getByText('200/200')).toBeInTheDocument()
+    const rendered = screen.getAllByRole('listitem').length
+    expect(rendered).toBeLessThan(40)
+    expect(rendered).toBeGreaterThan(3)
   })
 })

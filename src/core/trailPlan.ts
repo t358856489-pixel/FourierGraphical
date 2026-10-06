@@ -1,6 +1,8 @@
 import { assembleTrail, createTipSampler, maxAbsFrequency, trailStep } from './evaluator'
 import {
   DEFAULT_MAX_TRAIL_POINTS,
+  TRAIL_EVALUATION_BUDGET,
+  TRAIL_FADING_EVALUATION_BUDGET,
   HIGHLIGHT_SECONDS,
   MAX_RETENTION_SECONDS,
   MIN_SAMPLES_PER_TURN,
@@ -12,6 +14,14 @@ import type { FourierFunction, PresentationMode, TrailPlan, ViewSettings } from 
 
 const FREQUENCY_PRECISION = 1000
 const PRECISION_TOLERANCE = 1e-9
+
+/** 采样点预算按启用分量数反比缩放, 使每次整体重算的求值次数(点 × 分量)不超过固定预算 (功能 003 R3) */
+const enabledCount = (fn: FourierFunction): number =>
+  Math.max(1, fn.components.filter((component) => component.enabled).length)
+const retainedPointBudget = (fn: FourierFunction): number =>
+  Math.min(RETAINED_TRAIL_POINT_BUDGET, Math.floor(TRAIL_EVALUATION_BUDGET / enabledCount(fn)))
+const fadingPointBudget = (fn: FourierFunction): number =>
+  Math.min(DEFAULT_MAX_TRAIL_POINTS, Math.floor(TRAIL_FADING_EVALUATION_BUDGET / enabledCount(fn)))
 
 const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
 
@@ -47,7 +57,7 @@ const fadingPlan = (
   mode: TrailPlan['mode'],
 ): TrailPlan => {
   const start = Math.max(0, t - windowSeconds)
-  const step = trailStep(fn, windowSeconds, DEFAULT_MAX_TRAIL_POINTS)
+  const step = trailStep(fn, windowSeconds, fadingPointBudget(fn))
   const fastest = maxAbsFrequency(fn)
   return {
     start,
@@ -67,11 +77,8 @@ const shrinkToPeriod = (windowSeconds: number, period: number | null): number =>
   period !== null && period < windowSeconds ? Math.max(period, HIGHLIGHT_SECONDS) : windowSeconds
 
 /** 形状永远正确: 步长按 2 的幂放大, 但不得低于每圈 MIN_SAMPLES_PER_TURN 点; 预算仍不够就缩短窗口 */
-const fitToBudget = (windowSeconds: number, baseStep: number, fastest: number) => {
-  const wanted = Math.max(
-    0,
-    Math.ceil(Math.log2(windowSeconds / baseStep / RETAINED_TRAIL_POINT_BUDGET)),
-  )
+const fitToBudget = (windowSeconds: number, baseStep: number, fastest: number, budget: number) => {
+  const wanted = Math.max(0, Math.ceil(Math.log2(windowSeconds / baseStep / budget)))
   const allowed =
     fastest === 0
       ? wanted
@@ -84,9 +91,7 @@ const fitToBudget = (windowSeconds: number, baseStep: number, fastest: number) =
     step,
     isShortened,
     // 缩短后的窗口不得短于高亮段: 目前的常量组合下不会发生, 但不能靠巧合
-    windowSeconds: isShortened
-      ? Math.max(HIGHLIGHT_SECONDS, RETAINED_TRAIL_POINT_BUDGET * step)
-      : windowSeconds,
+    windowSeconds: isShortened ? Math.max(HIGHLIGHT_SECONDS, budget * step) : windowSeconds,
   }
 }
 
@@ -105,7 +110,7 @@ export const planTrail = (
   const fastest = maxAbsFrequency(fn)
   const baseStep = 1 / Math.max(MIN_TRAIL_SAMPLE_RATE, SAMPLES_PER_TURN * fastest)
   const wanted = shrinkToPeriod(Math.min(retention, t), periodOf(fn))
-  const fitted = fitToBudget(Math.max(wanted, baseStep), baseStep, fastest)
+  const fitted = fitToBudget(Math.max(wanted, baseStep), baseStep, fastest, retainedPointBudget(fn))
   const start = Math.max(0, t - Math.min(wanted, fitted.windowSeconds))
 
   return {

@@ -7,7 +7,14 @@ import {
 } from '../../state/documentStore'
 import { showError } from '../../ui/toastStore'
 import { PresetPicker } from '../presets/PresetPicker'
+import { ShapeDialog } from '../shapes/ShapeDialog'
+import { useState } from 'react'
 import { ComponentRow } from './ComponentRow'
+import { VIRTUALIZE_FROM, VirtualList } from './VirtualList'
+
+/** 虚拟化时的固定行高(CSS 像素): 头部 + 三个参数行 + 内边距 */
+const ROW_HEIGHT = 156
+const LIST_HEIGHT = 640
 import './components-panel.css'
 
 export function ComponentsPanel() {
@@ -16,6 +23,7 @@ export function ComponentsPanel() {
   const canRedo = useDocumentStore(selectCanRedo)
   const { addComponent, undo, redo } = useDocumentStore.getState()
   const isFull = components.length >= MAX_COMPONENTS
+  const [isShapeOpen, setShapeOpen] = useState(false)
 
   const handleAdd = () => {
     const result = addComponent()
@@ -32,6 +40,9 @@ export function ComponentsPanel() {
           </span>
         </h2>
         <div className="components-panel__tools">
+          <button type="button" className="button" onClick={() => setShapeOpen(true)}>
+            图形
+          </button>
           <button type="button" className="button" disabled={!canUndo} onClick={undo}>
             撤销
           </button>
@@ -42,11 +53,28 @@ export function ComponentsPanel() {
       </header>
 
       <PresetPicker />
+      <ShapeDialog isOpen={isShapeOpen} onClose={() => setShapeOpen(false)} />
 
       {components.length === 0 ? (
         <p className="components-panel__empty">
           还没有分量. 添加一个旋转向量, 开始搭建你的傅立叶函数.
         </p>
+      ) : components.length >= VIRTUALIZE_FROM ? (
+        <VirtualList
+          items={components}
+          rowHeight={ROW_HEIGHT}
+          viewportHeight={LIST_HEIGHT}
+          listClassName="components-panel__list components-panel__list--virtual"
+          renderRow={(component, index, style) => (
+            <ComponentRow
+              key={component.id}
+              component={component}
+              index={index}
+              count={components.length}
+              style={style}
+            />
+          )}
+        />
       ) : (
         <ol className="components-panel__list">
           {components.map((component, index) => (

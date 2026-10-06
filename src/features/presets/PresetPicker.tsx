@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { PRESETS, type PresetId } from '../../core/presets'
 import { MAX_COMPONENTS } from '../../core/ranges'
-import type { FourierFunction, Range } from '../../core/types'
+import type { Range } from '../../core/types'
 import { useDocumentStore } from '../../state/documentStore'
-import { ConfirmDialog } from '../../ui/Dialog'
 import { Slider } from '../../ui/Slider'
 import { showError } from '../../ui/toastStore'
+import { useOverwriteGuard } from '../shapes/useOverwriteGuard'
 import './presets.css'
 
 const COUNT_RANGE: Range = { min: 1, max: MAX_COMPONENTS, step: 1, unit: '' }
@@ -21,23 +21,21 @@ const THUMBNAILS: Readonly<Record<PresetId, string>> = {
 export function PresetPicker() {
   const [active, setActive] = useState<PresetId | null>(null)
   const [count, setCount] = useState(DEFAULT_COUNT)
-  const [pending, setPending] = useState<PresetId | null>(null)
-  // 预设刚生成、用户尚未改动的文档: 从它切换到别的预设不会丢失任何用户修改, 无需确认
-  const untouchedPreset = useRef<FourierFunction | null>(null)
-  const { applyPreset, commitEdit, hasUnsavedChanges } = useDocumentStore.getState()
+  const { guard, markGenerated, dialog } = useOverwriteGuard({
+    title: '替换当前函数?',
+    message: '应用预设会替换全部分量, 它们的关键帧和尚未保存的修改都会被丢弃. 之后仍可用撤销恢复.',
+    confirmLabel: '替换',
+  })
+  const { applyPreset, commitEdit } = useDocumentStore.getState()
 
   const apply = (preset: PresetId, nextCount: number, mode: 'preview' | 'commit') => {
     const result = applyPreset(preset, nextCount, mode)
     if (!result.ok) return showError(result.error.message)
     setActive(preset)
-    untouchedPreset.current = result.value
+    markGenerated(result.value)
   }
 
-  const choose = (preset: PresetId) => {
-    const present = useDocumentStore.getState().history.present
-    if (hasUnsavedChanges() && present !== untouchedPreset.current) setPending(preset)
-    else apply(preset, count, 'commit')
-  }
+  const choose = (preset: PresetId) => guard(() => apply(preset, count, 'commit'))
 
   return (
     <div className="presets">
@@ -74,17 +72,7 @@ export function PresetPicker() {
           <output className="mono">{count}</output>
         </div>
       )}
-      <ConfirmDialog
-        title="替换当前函数?"
-        message="应用预设会替换全部分量, 它们的关键帧和尚未保存的修改都会被丢弃. 之后仍可用撤销恢复."
-        confirmLabel="替换"
-        isOpen={pending !== null}
-        onCancel={() => setPending(null)}
-        onConfirm={() => {
-          if (pending) apply(pending, count, 'commit')
-          setPending(null)
-        }}
-      />
+      {dialog}
     </div>
   )
 }

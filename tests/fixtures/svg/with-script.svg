@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><script>window.__pwned = true</script><image href="https://example.invalid/x.png" width="10" height="10"/><path onload="window.__pwned = true" d="M 20 20 L 180 20 L 180 180 L 20 180 Z"/></svg>
