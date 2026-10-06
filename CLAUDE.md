@@ -37,6 +37,7 @@ pnpm dev | pnpm test | pnpm test:coverage | pnpm test:e2e | pnpm lint | pnpm typ
 - 单文件 < 800 行, 单函数 < 50 行; 按功能而非文件类型组织
 
 ## 最近变更
+- 003-shape-to-fourier: 计划阶段. 路径→分量用等弧长重采样 + DFT(`src/core/shape/`, 无新依赖); MAX_COMPONENTS 50 → 200, 轨迹采样预算改为按分量数自适应; SVG 只用 DOMParser 本地解析
 - 002-canvas-display-options: 已实现(网格/坐标轴分离、轨迹保留、背景色). 不新增依赖. 新增纯函数模块 `core/color`、`core/trailPlan`、`render/palette`; 显示选项只进 `ViewSettings`(应用级偏好), 已保存函数的格式不变
 - 001-fourier-visual-editor: 新增实施计划(规范、研究、数据模型、契约、quickstart)
 
