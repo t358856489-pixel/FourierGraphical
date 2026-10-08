@@ -16,7 +16,9 @@ describe('ParamControl keyframes', () => {
     render(<ComponentsPanel />)
     await userEvent.click(screen.getByRole('button', { name: /为分量 1 振幅添加关键帧/ }))
     expect(first()?.amplitude.kind).toBe('animated')
-    expect(screen.getByRole('button', { name: /分量 1 振幅添加关键帧\(已动画\)/ })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /分量 1 振幅添加关键帧\(已动画\)/ }),
+    ).toBeInTheDocument()
   })
 
   test('an animated control follows the playback time', () => {

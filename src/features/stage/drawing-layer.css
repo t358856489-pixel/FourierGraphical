@@ -1,0 +1,39 @@
+.drawing-layer {
+  position: absolute;
+  inset: 0;
+  color: var(--screen-trace);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.drawing-layer__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.drawing-layer__tools {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100% - 2 * var(--space-3));
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
+  cursor: default;
+  background: var(--panel-raised);
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 12px 32px oklch(20% 0.02 60 / 0.35);
+}
+
+.drawing-layer__field {
+  display: grid;
+  gap: 2px;
+  width: 9rem;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}

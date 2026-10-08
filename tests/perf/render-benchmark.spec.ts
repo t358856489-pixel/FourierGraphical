@@ -15,8 +15,10 @@ const FRAME_BUDGET_60 = 1000 / 60
 // 帧间隔被垂直同步量化为 16.7ms 的整数倍(59.94Hz 下两帧是 33.4ms), 所以"不低于 30 fps"的判据是"不超过两帧"
 const TWO_FRAMES_MS = 34
 
+const BASELINE_COMPONENTS = 50
+
 const heavyFunction = (): FourierFunction => {
-  const preset = applyPreset(createDefaultFunction(), 'sawtooth', MAX_COMPONENTS)
+  const preset = applyPreset(createDefaultFunction(), 'sawtooth', BASELINE_COMPONENTS)
   if (!preset.ok) throw new Error(preset.error.message)
   return preset.value.components.slice(0, ANIMATED_TRACKS).reduce((fn, component, index) => {
     const base = component.amplitude.kind === 'constant' ? component.amplitude.value : 0
@@ -62,7 +64,8 @@ const loadDraft = async (
     draft,
   )
   await page.reload()
-  await expect(page.locator('.component-row')).toHaveCount(MAX_COMPONENTS)
+  // 列表在分量多时虚拟化, 不再逐行计数; 面板头部的计数读数始终完整
+  await expect(page.getByText(`${fn.components.length}/${MAX_COMPONENTS}`)).toBeVisible()
 }
 
 interface FrameStats {
@@ -158,7 +161,7 @@ test.describe('retained trail at the ten minute cap: 50 components', () => {
 
   const retainedView = { ...INITIAL_VIEW, trailFade: false, trailRetention: 'all' as const }
   const periodic = (): FourierFunction => {
-    const preset = applyPreset(createDefaultFunction(), 'sawtooth', MAX_COMPONENTS)
+    const preset = applyPreset(createDefaultFunction(), 'sawtooth', BASELINE_COMPONENTS)
     if (!preset.ok) throw new Error(preset.error.message)
     return { ...preset.value, presentationMode: 'drawing2d' }
   }
@@ -193,5 +196,39 @@ test.describe('retained trail at the ten minute cap: 50 components', () => {
     const stats = await measureFrames(page, MEASURE_MS, true)
     report('retained "all", t=600, non-periodic, edit every frame', stats)
     expect(stats.p95Ms).toBeLessThan(100)
+  })
+})
+
+/** 功能 003: 分量上限 50 → 200. 预算按分量数自适应后, 200 个分量下仍须达标 */
+test.describe('200 components', () => {
+  test.skip(({ browserName, isMobile }) => browserName !== 'chromium' || isMobile, 'Chromium desktop only')
+  test.describe.configure({ mode: 'serial' })
+  const heavy200 = (): FourierFunction => {
+    const preset = applyPreset(createDefaultFunction(), 'sawtooth', MAX_COMPONENTS)
+    if (!preset.ok) throw new Error(preset.error.message)
+    return { ...preset.value, presentationMode: 'drawing2d' }
+  }
+
+  test('steady playback holds 60 fps', async ({ page }) => {
+    await loadDraft(page, heavy200())
+    await expect(page.getByRole('button', { name: '暂停', exact: true })).toBeVisible()
+    const stats = await measureFrames(page, MEASURE_MS, false)
+    report('200 components, playback', stats)
+    expect(stats.p95Ms).toBeLessThan(25)
+  })
+
+  test('editing every frame stays within 100 ms', async ({ page }) => {
+    await loadDraft(page, heavy200())
+    const stats = await measureFrames(page, MEASURE_MS, true)
+    report('200 components, edit every frame', stats)
+    expect(stats.p95Ms).toBeLessThan(100)
+  })
+
+  test('retained "all" at t = 600 holds 60 fps', async ({ page }) => {
+    await loadDraft(page, heavy200(), { ...INITIAL_VIEW, trailFade: false, trailRetention: 'all' }, 600)
+    await expect(page.getByRole('button', { name: '暂停', exact: true })).toBeVisible()
+    const stats = await measureFrames(page, MEASURE_MS, false)
+    report('200 components, retained all, t=600', stats)
+    expect(stats.p95Ms).toBeLessThan(25)
   })
 })

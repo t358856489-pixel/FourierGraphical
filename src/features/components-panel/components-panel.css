@@ -115,3 +115,14 @@
   min-height: 1.75rem;
   box-shadow: none;
 }
+
+/* 虚拟化列表: 行绝对定位、固定高度; 超出部分(如混叠提示)裁掉 */
+.components-panel__list--virtual {
+  display: block;
+  overflow: visible;
+}
+
+.component-row[data-virtual='true'] {
+  overflow: hidden;
+  list-style: none;
+}

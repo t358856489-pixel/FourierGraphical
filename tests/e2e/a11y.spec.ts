@@ -42,3 +42,19 @@ for (const background of ['默认深色', '纯白'] as const) {
     expect(await seriousViolations(page)).toEqual([])
   })
 }
+
+for (const tab of ['图形库', '手绘', '导入'] as const) {
+  test(`the shape dialog's "${tab}" tab has no serious violations`, async ({ page }) => {
+    await page.getByRole('button', { name: '图形', exact: true }).click()
+    await page.getByRole('tab', { name: tab }).click()
+    expect(await seriousViolations(page)).toEqual([])
+  })
+}
+
+test('the drawing overlay has no serious violations', async ({ page }) => {
+  await page.getByRole('button', { name: '图形', exact: true }).click()
+  await page.getByRole('tab', { name: '手绘' }).click()
+  await page.getByRole('button', { name: '开始绘制' }).click()
+  await expect(page.getByRole('toolbar', { name: '手绘工具' })).toBeVisible()
+  expect(await seriousViolations(page)).toEqual([])
+})

@@ -89,6 +89,22 @@ export interface TrailPlan {
   readonly isShortened: boolean
 }
 
+/** 闭合的平面路径: 有序点列, 末点隐式连回首点; 一律世界坐标(y 向上) */
+export type ShapePath = readonly Vec2[]
+
+export interface SpectrumTerm {
+  /** 频率索引: 频率 = n × 基频; 不含 0 */
+  readonly n: number
+  readonly amplitude: number
+  readonly phaseDeg: number
+}
+
+export interface ShapeSpectrum {
+  /** 按振幅降序 */
+  readonly terms: readonly SpectrumTerm[]
+  readonly sampleCount: number
+}
+
 export interface History {
   readonly past: readonly FourierFunction[]
   readonly present: FourierFunction
@@ -113,6 +129,7 @@ export type ErrorCode =
   | 'STORAGE_QUOTA'
   | 'DATA_CORRUPT'
   | 'NOT_FOUND'
+  | 'IMPORT_UNSUPPORTED'
   | 'EXPORT_UNSUPPORTED'
   | 'EXPORT_FAILED'
   | 'EXPORT_ABORTED'

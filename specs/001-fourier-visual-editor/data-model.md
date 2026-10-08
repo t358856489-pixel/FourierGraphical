@@ -25,7 +25,7 @@ PlaybackState ── 0..1 LoopRegion        ViewSettings        PresetDefinition
 | `id` | `string` (UUID) | 创建时生成, 不变 |
 | `schemaVersion` | `1` | 用于未来迁移; 不识别的版本按"数据不兼容"处理 |
 | `name` | `string` | 去首尾空白后 1–60 字符; 在已保存列表中**允许重名**(以 `id` 区分) |
-| `components` | `readonly HarmonicComponent[]` | 长度 0–50 (FR-002); 顺序即首尾相接的顺序 |
+| `components` | `readonly HarmonicComponent[]` | 长度 0–200 (FR-002; 功能 003 把上限由 50 提高到 200); 顺序即首尾相接的顺序 |
 | `presentationMode` | `'waveform' \| 'drawing2d'` | 上次使用的呈现模式 (FR-008) |
 | `createdAt` / `updatedAt` | ISO 8601 字符串 | `updatedAt` 在每次保存时更新 |
 

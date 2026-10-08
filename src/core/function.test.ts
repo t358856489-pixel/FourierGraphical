@@ -122,3 +122,20 @@ describe('rename', () => {
     expect(result.ok === false && result.error.code).toBe('INVALID_NAME')
   })
 })
+
+describe('component limit of 200 (feature 003)', () => {
+  test('allows the 200th component and refuses the 201st', () => {
+    let fn = createDefaultFunction()
+    while (fn.components.length < 200) fn = unwrap(addComponent(fn))
+    expect(fn.components).toHaveLength(200)
+    const result = addComponent(fn)
+    expect(result.ok === false && result.error.code).toBe('COMPONENT_LIMIT')
+  })
+
+  test('presets accept 200 components and refuse 201', async () => {
+    const { applyPreset } = await import('./function')
+    expect(applyPreset(createDefaultFunction(), 'square', 200).ok).toBe(true)
+    const result = applyPreset(createDefaultFunction(), 'square', 201)
+    expect(result.ok === false && result.error.code).toBe('OUT_OF_RANGE')
+  })
+})

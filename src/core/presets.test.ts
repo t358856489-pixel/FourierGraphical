@@ -64,7 +64,7 @@ describe('presets', () => {
     expect(error(25)).toBeLessThan(error(2))
   })
 
-  test.each([0, 51, 2.5, Number.NaN])('rejects a component count of %s', (count) => {
+  test.each([0, 201, 2.5, Number.NaN])('rejects a component count of %s', (count) => {
     const result = applyPreset(createDefaultFunction(), 'square', count)
     expect(result.ok === false && result.error.code).toBe('OUT_OF_RANGE')
   })

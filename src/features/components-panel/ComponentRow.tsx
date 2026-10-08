@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { HarmonicComponent, ParamName } from '../../core/types'
 import { useDocumentStore } from '../../state/documentStore'
 import { useViewStore } from '../../state/viewStore'
@@ -9,9 +10,11 @@ interface ComponentRowProps {
   readonly component: HarmonicComponent
   readonly index: number
   readonly count: number
+  /** 虚拟化列表传入的定位样式 */
+  readonly style?: CSSProperties
 }
 
-export function ComponentRow({ component, index, count }: ComponentRowProps) {
+export function ComponentRow({ component, index, count, style }: ComponentRowProps) {
   const { setEnabled, moveComponent, removeComponent } = useDocumentStore.getState()
   const isHighlighted = useViewStore((state) => state.highlightedComponentId === component.id)
   const highlight = useViewStore((state) => state.highlight)
@@ -21,6 +24,9 @@ export function ComponentRow({ component, index, count }: ComponentRowProps) {
   return (
     <li
       className="component-row"
+      data-index={index}
+      style={style}
+      data-virtual={style !== undefined}
       data-enabled={component.enabled}
       data-highlighted={isHighlighted}
       onFocusCapture={() => useViewStore.getState().select(component.id)}

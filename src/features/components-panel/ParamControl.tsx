@@ -1,5 +1,11 @@
 import { evaluate } from '../../core/keyframes'
-import { ALIASING_WARNING_FREQUENCY, MAX_KEYFRAMES, PARAM_LABELS, SLIDER_RANGES, rangeOf } from '../../core/ranges'
+import {
+  ALIASING_WARNING_FREQUENCY,
+  MAX_KEYFRAMES,
+  PARAM_LABELS,
+  SLIDER_RANGES,
+  rangeOf,
+} from '../../core/ranges'
 import type { HarmonicComponent, ParamName } from '../../core/types'
 import { useDocumentStore } from '../../state/documentStore'
 import { usePlaybackStore } from '../../state/playbackStore'

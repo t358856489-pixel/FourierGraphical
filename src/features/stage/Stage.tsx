@@ -5,6 +5,7 @@ import { derivePalette } from '../../render/palette'
 import { readRenderTheme } from '../../render/theme'
 import { selectFunction, useDocumentStore } from '../../state/documentStore'
 import { useViewStore } from '../../state/viewStore'
+import { DrawingLayer } from './DrawingLayer'
 import { setStageSize } from './stageSize'
 import { useStageLoop } from './useStageLoop'
 import { useStagePointer } from './useStagePointer'
@@ -68,6 +69,7 @@ export function Stage() {
         aria-label={summary}
         {...pointerHandlers}
       />
+      <DrawingLayer sizeRef={sizeRef} />
       {enabledCount === 0 && (
         <p className="stage__empty">没有启用的分量. 在面板中添加或启用一个分量, 图形就会出现.</p>
       )}

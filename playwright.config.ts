@@ -19,7 +19,14 @@ export default defineConfig({
   projects: [
     // channel: 'chromium' 使用完整版 Chromium 的新 headless 模式, 行为与真实浏览器一致
     { name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chromium' } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        // 本机若配置了系统代理, Firefox 会把 localhost 也送去代理(Chromium/WebKit 不会), 得到 502
+        launchOptions: { firefoxUserPrefs: { 'network.proxy.type': 0 } },
+      },
+    },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     { name: 'mobile', use: { ...devices['Pixel 7'], channel: 'chromium' } },
   ],

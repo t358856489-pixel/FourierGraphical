@@ -283,3 +283,18 @@ describe('parseDraft', () => {
     expect(draftSchema.safeParse('draft').success).toBe(false)
   })
 })
+
+describe('component limit of 200 in persisted functions (feature 003)', () => {
+  const withCount = (count: number) => ({
+    ...valid,
+    components: Array.from({ length: count }, (_, i) => ({
+      ...first,
+      id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+      amplitude: { kind: 'constant', value: 1 },
+    })),
+  })
+  test('accepts 200 components and rejects 201', () => {
+    expect(parseFunction(withCount(200)).ok).toBe(true)
+    expect(parseFunction(withCount(201)).ok).toBe(false)
+  })
+})
