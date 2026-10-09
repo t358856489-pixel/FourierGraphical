@@ -88,7 +88,9 @@ tip_n(t)    = Σ_{k ≤ n, enabled}  amplitude_k(t) · (cos θ_k(t), sin θ_k(t)
 y(t)        = tip_N(t).y                                                         // 波形模式的纵向投影
 ```
 
-轨迹 = `tip_N` 在 `[max(0, t − W), t]` 上的采样 (research R5). 自动缩放范围 (FR-011) = 所有启用分量在全部关键帧上的最大振幅之和.
+轨迹 = `tip_N` 在 `[max(0, t − W), t]` 上的采样 (research R5).
+
+> 功能 004 把这些派生量写成可查看、可复制的数学表达式: 第 k 项 `A_k·e^{i(2π·f_k·t + φ_k°)}`(常量轨道; 关键帧轨道取当前时刻的瞬时值), 见 [004 的数据模型](../004-view-copy-expression/data-model.md). 自动缩放范围 (FR-011) = 所有启用分量在全部关键帧上的最大振幅之和.
 
 ## PlaybackState (时间状态)
 
