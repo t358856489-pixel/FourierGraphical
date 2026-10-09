@@ -1,12 +1,16 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
-import { openPaused, seekTo } from './helpers'
+import { openExpression, openPaused, seekTo } from './helpers'
 
 const seriousViolations = async (page: Page) => {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag22aa']).analyze()
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
+    .analyze()
   return results.violations
     .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
-    .map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target).join(' | ')}`)
+    .map(
+      (violation) => `${violation.id}: ${violation.nodes.map((node) => node.target).join(' | ')}`,
+    )
 }
 
 test.beforeEach(async ({ page }) => openPaused(page))
@@ -35,7 +39,9 @@ for (const [button, dialog] of [
 }
 
 for (const background of ['默认深色', '纯白'] as const) {
-  test(`the display panel on a ${background} canvas has no serious violations`, async ({ page }) => {
+  test(`the display panel on a ${background} canvas has no serious violations`, async ({
+    page,
+  }) => {
     await page.getByText('画面', { exact: true }).click()
     await page.getByRole('button', { name: background }).click()
     await page.getByRole('button', { name: '轨迹淡化' }).click()
@@ -56,5 +62,11 @@ test('the drawing overlay has no serious violations', async ({ page }) => {
   await page.getByRole('tab', { name: '手绘' }).click()
   await page.getByRole('button', { name: '开始绘制' }).click()
   await expect(page.getByRole('toolbar', { name: '手绘工具' })).toBeVisible()
+  expect(await seriousViolations(page)).toEqual([])
+})
+
+test('the expression panel has no serious violations (004 SC-005)', async ({ page }) => {
+  await page.getByRole('button', { name: '方波' }).click()
+  await openExpression(page)
   expect(await seriousViolations(page)).toEqual([])
 })

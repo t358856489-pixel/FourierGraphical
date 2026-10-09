@@ -77,7 +77,11 @@ interface FrameStats {
 }
 
 /** 采样 rAF 间隔; onFrame 在页面内每帧执行, 用来制造负载(例如每帧改一次参数) */
-const measureFrames = (page: Page, durationMs: number, stressSlider: boolean): Promise<FrameStats> =>
+const measureFrames = (
+  page: Page,
+  durationMs: number,
+  stressSlider: boolean,
+): Promise<FrameStats> =>
   page.evaluate(
     ({ duration, stress }) =>
       new Promise<FrameStats>((resolve) => {
@@ -118,7 +122,10 @@ const report = (label: string, stats: FrameStats) =>
   )
 
 test.describe('render benchmark: 50 components, 10 keyframed tracks', () => {
-  test.skip(({ browserName, isMobile }) => browserName !== 'chromium' || isMobile, 'Chromium desktop only (uses CDP)')
+  test.skip(
+    ({ browserName, isMobile }) => browserName !== 'chromium' || isMobile,
+    'Chromium desktop only (uses CDP)',
+  )
   test.describe.configure({ mode: 'serial' })
 
   test('steady playback holds the 60 fps frame budget', async ({ page }) => {
@@ -129,7 +136,9 @@ test.describe('render benchmark: 50 components, 10 keyframed tracks', () => {
     expect(stats.p95Ms).toBeLessThan(FRAME_BUDGET_60 * 1.5)
   })
 
-  test('editing a parameter every frame during playback stays interactive (SC-002)', async ({ page }) => {
+  test('editing a parameter every frame during playback stays interactive (SC-002)', async ({
+    page,
+  }) => {
     await loadDraft(page, heavyFunction())
     const stats = await measureFrames(page, MEASURE_MS, true)
     report('playback + edit every frame (full trail resample), desktop', stats)
@@ -137,7 +146,9 @@ test.describe('render benchmark: 50 components, 10 keyframed tracks', () => {
     expect(stats.p95Ms).toBeLessThan(100)
   })
 
-  test('with a 4x CPU slowdown (phone-class estimate) playback stays above 30 fps', async ({ page }) => {
+  test('with a 4x CPU slowdown (phone-class estimate) playback stays above 30 fps', async ({
+    page,
+  }) => {
     await loadDraft(page, heavyFunction())
     const cdp = await page.context().newCDPSession(page)
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
@@ -156,7 +167,10 @@ test.describe('render benchmark: 50 components, 10 keyframed tracks', () => {
  * a) 周期函数: 只需采样一个周期; b) 不成整数比: 走满点数预算; c) 场景 b 下每帧改一次参数(整条轨迹重算).
  */
 test.describe('retained trail at the ten minute cap: 50 components', () => {
-  test.skip(({ browserName, isMobile }) => browserName !== 'chromium' || isMobile, 'Chromium desktop only')
+  test.skip(
+    ({ browserName, isMobile }) => browserName !== 'chromium' || isMobile,
+    'Chromium desktop only',
+  )
   test.describe.configure({ mode: 'serial' })
 
   const retainedView = { ...INITIAL_VIEW, trailFade: false, trailRetention: 'all' as const }
@@ -169,7 +183,10 @@ test.describe('retained trail at the ten minute cap: 50 components', () => {
     const fn = periodic()
     return fn.components.slice(0, 5).reduce((current, component) => {
       const value = component.frequency.kind === 'constant' ? component.frequency.value : 0
-      return updateTrack(current, component.id, 'frequency', { kind: 'constant', value: value * 1.0007123 })
+      return updateTrack(current, component.id, 'frequency', {
+        kind: 'constant',
+        value: value * 1.0007123,
+      })
     }, fn)
   }
 
@@ -191,7 +208,9 @@ test.describe('retained trail at the ten minute cap: 50 components', () => {
     expect(stats.p95Ms).toBeLessThan(25)
   })
 
-  test('editing a parameter every frame redraws the whole retained trail within 100 ms', async ({ page }) => {
+  test('editing a parameter every frame redraws the whole retained trail within 100 ms', async ({
+    page,
+  }) => {
     await loadDraft(page, aperiodic(), retainedView, 600)
     const stats = await measureFrames(page, MEASURE_MS, true)
     report('retained "all", t=600, non-periodic, edit every frame', stats)
@@ -201,7 +220,10 @@ test.describe('retained trail at the ten minute cap: 50 components', () => {
 
 /** 功能 003: 分量上限 50 → 200. 预算按分量数自适应后, 200 个分量下仍须达标 */
 test.describe('200 components', () => {
-  test.skip(({ browserName, isMobile }) => browserName !== 'chromium' || isMobile, 'Chromium desktop only')
+  test.skip(
+    ({ browserName, isMobile }) => browserName !== 'chromium' || isMobile,
+    'Chromium desktop only',
+  )
   test.describe.configure({ mode: 'serial' })
   const heavy200 = (): FourierFunction => {
     const preset = applyPreset(createDefaultFunction(), 'sawtooth', MAX_COMPONENTS)
@@ -224,8 +246,27 @@ test.describe('200 components', () => {
     expect(stats.p95Ms).toBeLessThan(100)
   })
 
+  /** 功能 004: 表达式面板展开时, 每帧编辑既重算轨迹也重渲染 200 项表达式, 仍须在 100 ms 内 */
+  test('editing every frame with the expression panel open stays within 100 ms', async ({
+    page,
+  }) => {
+    await loadDraft(page, heavy200())
+    await page.getByRole('button', { name: '表达式', exact: true }).click()
+    await expect(page.getByRole('region', { name: '表达式' }).locator('.expr-term')).toHaveCount(
+      MAX_COMPONENTS,
+    )
+    const stats = await measureFrames(page, MEASURE_MS, true)
+    report('200 components, expression panel open, edit every frame', stats)
+    expect(stats.p95Ms).toBeLessThan(100)
+  })
+
   test('retained "all" at t = 600 holds 60 fps', async ({ page }) => {
-    await loadDraft(page, heavy200(), { ...INITIAL_VIEW, trailFade: false, trailRetention: 'all' }, 600)
+    await loadDraft(
+      page,
+      heavy200(),
+      { ...INITIAL_VIEW, trailFade: false, trailRetention: 'all' },
+      600,
+    )
     await expect(page.getByRole('button', { name: '暂停', exact: true })).toBeVisible()
     const stats = await measureFrames(page, MEASURE_MS, false)
     report('200 components, retained all, t=600', stats)

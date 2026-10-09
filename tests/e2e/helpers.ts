@@ -84,11 +84,37 @@ export const diffRatio = async (page: Page, a: Buffer, b: Buffer): Promise<numbe
       }
       return differing / (pa.length / 4)
     },
-    [`data:image/png;base64,${a.toString('base64')}`, `data:image/png;base64,${b.toString('base64')}`],
+    [
+      `data:image/png;base64,${a.toString('base64')}`,
+      `data:image/png;base64,${b.toString('base64')}`,
+    ],
   )
 
 export const canvasShot = async (page: Page): Promise<Buffer> => {
   await page.mouse.move(0, 0)
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  )
   return canvas(page).screenshot({ animations: 'disabled' })
 }
+
+// —— 功能 004: 表达式面板 ——
+export const expressionButton = (page: Page): Locator =>
+  page.getByRole('button', { name: '表达式', exact: true })
+export const expressionPanel = (page: Page): Locator => page.getByRole('region', { name: '表达式' })
+export const expressionTerms = (page: Page): Locator => expressionPanel(page).locator('.expr-term')
+
+/** 展开表达式面板(已展开则不动) */
+export const openExpression = async (page: Page): Promise<void> => {
+  if ((await expressionButton(page).getAttribute('aria-expanded')) !== 'true') {
+    await expressionButton(page).click()
+  }
+  await expect(expressionPanel(page)).toBeVisible()
+}
+
+/** 面板里供读屏的纯文本版本 = 复制得到的纯文本 */
+export const expressionText = async (page: Page): Promise<string> =>
+  (await page.getByTestId('expression-plain').textContent()) ?? ''
+
+export const componentCount = async (page: Page): Promise<number> =>
+  Number((await page.locator('.components-panel__count').textContent())?.split('/')[0])

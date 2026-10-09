@@ -106,4 +106,23 @@ describe('ComponentsPanel with many components (feature 003)', () => {
     expect(rendered).toBeLessThan(40)
     expect(rendered).toBeGreaterThan(3)
   })
+
+  test('the "表达式" button opens a live panel between the header and the list (004 US1)', async () => {
+    render(<ComponentsPanel />)
+    const button = screen.getByRole('button', { name: '表达式' })
+    await userEvent.click(button)
+    const panel = screen.getByRole('region', { name: '表达式' })
+    const header = screen.getByRole('heading', { name: /谐波分量/ })
+    const list = screen.getByRole('list')
+    expect(header.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(panel.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    // 面板打开期间列表照常可编辑, 表达式随之变化
+    const slider = screen.getByRole('slider', { name: '分量 1 振幅' })
+    fireEvent.change(slider, { target: { value: '2' } })
+    expect(screen.getByTestId('expression-plain').textContent).toContain('2·sin(')
+
+    await userEvent.click(button)
+    expect(screen.queryByRole('region', { name: '表达式' })).not.toBeInTheDocument()
+  })
 })

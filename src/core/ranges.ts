@@ -103,3 +103,11 @@ export const SVG_YIELD_EVERY = 5_000
 /** 轨迹采样的求值预算(采样点 × 分量数): 点数预算 = 预算 ÷ 启用分量数 */
 export const TRAIL_EVALUATION_BUDGET = 2_000_000
 export const TRAIL_FADING_EVALUATION_BUDGET = 400_000
+
+// —— 功能 004: 查看并复制数学表达式 ——
+/** 表达式中系数的最多小数位 */
+export const EXPRESSION_DECIMALS = 4
+/** 含动画参数时, 表达式随播放时刻刷新的节流间隔(毫秒) */
+export const EXPRESSION_REFRESH_MS = 250
+/** LaTeX 的 aligned 环境中每行放几项 */
+export const LATEX_TERMS_PER_LINE = 3

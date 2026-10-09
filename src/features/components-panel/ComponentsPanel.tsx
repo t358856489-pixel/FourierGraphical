@@ -5,10 +5,12 @@ import {
   selectFunction,
   useDocumentStore,
 } from '../../state/documentStore'
+import { useExpressionStore } from '../../state/expressionStore'
 import { showError } from '../../ui/toastStore'
+import { EXPRESSION_PANEL_ID, ExpressionPanel } from '../expression/ExpressionPanel'
 import { PresetPicker } from '../presets/PresetPicker'
 import { ShapeDialog } from '../shapes/ShapeDialog'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ComponentRow } from './ComponentRow'
 import { VIRTUALIZE_FROM, VirtualList } from './VirtualList'
 
@@ -24,6 +26,13 @@ export function ComponentsPanel() {
   const { addComponent, undo, redo } = useDocumentStore.getState()
   const isFull = components.length >= MAX_COMPONENTS
   const [isShapeOpen, setShapeOpen] = useState(false)
+  const isExpressionOpen = useExpressionStore((state) => state.isOpen)
+  const toggleExpression = useExpressionStore((state) => state.toggleOpen)
+  const expressionButtonRef = useRef<HTMLButtonElement | null>(null)
+  const collapseExpression = () => {
+    toggleExpression()
+    expressionButtonRef.current?.focus()
+  }
 
   const handleAdd = () => {
     const result = addComponent()
@@ -40,6 +49,16 @@ export function ComponentsPanel() {
           </span>
         </h2>
         <div className="components-panel__tools">
+          <button
+            ref={expressionButtonRef}
+            type="button"
+            className="button"
+            aria-expanded={isExpressionOpen}
+            aria-controls={EXPRESSION_PANEL_ID}
+            onClick={toggleExpression}
+          >
+            表达式
+          </button>
           <button type="button" className="button" onClick={() => setShapeOpen(true)}>
             图形
           </button>
@@ -52,7 +71,10 @@ export function ComponentsPanel() {
         </div>
       </header>
 
-      <PresetPicker />
+      <div className="components-panel__stack">
+        <PresetPicker />
+        {isExpressionOpen && <ExpressionPanel onCollapse={collapseExpression} />}
+      </div>
       <ShapeDialog isOpen={isShapeOpen} onClose={() => setShapeOpen(false)} />
 
       {components.length === 0 ? (

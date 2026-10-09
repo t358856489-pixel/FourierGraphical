@@ -68,7 +68,9 @@ test('the main flow works without a mouse (FR-024)', async ({ page }) => {
   await expect(page.getByText('已保存"键盘作品"')).toBeVisible()
 })
 
-test('space on a focused button activates that button instead of toggling playback', async ({ page }) => {
+test('space on a focused button activates that button instead of toggling playback', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   await page.getByRole('button', { name: '网格' }).focus()
@@ -77,7 +79,9 @@ test('space on a focused button activates that button instead of toggling playba
   await expect(page.getByRole('button', { name: '播放', exact: true })).toBeVisible()
 })
 
-test('display options can be changed without a mouse, each within two interactions (SC-001)', async ({ page }) => {
+test('display options can be changed without a mouse, each within two interactions (SC-001)', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
 
@@ -85,7 +89,10 @@ test('display options can be changed without a mouse, each within two interactio
   await page.getByRole('button', { name: '坐标轴' }).focus()
   expect(await focusIsVisible(page)).toBe(true)
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('button', { name: '坐标轴' })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: '坐标轴' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
 
   // 其余选项: 展开面板 + 1 次操作
   await page.getByText('画面', { exact: true }).focus()
@@ -93,7 +100,10 @@ test('display options can be changed without a mouse, each within two interactio
   await page.keyboard.press('Enter')
   await page.getByRole('button', { name: '轨迹淡化' }).focus()
   await page.keyboard.press(' ')
-  await expect(page.getByRole('button', { name: '轨迹淡化' })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: '轨迹淡化' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
   await expect(page.getByRole('button', { name: '播放', exact: true })).toBeVisible()
 
   const select = page.getByRole('combobox', { name: '轨迹保留时长' })
@@ -108,10 +118,15 @@ test('display options can be changed without a mouse, each within two interactio
   await expect(page.getByRole('textbox', { name: '十六进制颜色值' })).toHaveValue('#ffffff')
   await page.getByRole('button', { name: '恢复默认' }).focus()
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('button', { name: '默认深色' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: '默认深色' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
 })
 
-test('a shape can be chosen, resized and applied with the keyboard; the file picker is reachable', async ({ page }) => {
+test('a shape can be chosen, resized and applied with the keyboard; the file picker is reachable', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   await page.getByRole('button', { name: '图形', exact: true }).focus()
@@ -133,7 +148,9 @@ test('a shape can be chosen, resized and applied with the keyboard; the file pic
   await expect(page.getByText('二维绘图')).toBeVisible()
 })
 
-test('with 200 components, Tab keeps moving through rows beyond the rendered window', async ({ page }) => {
+test('with 200 components, Tab keeps moving through rows beyond the rendered window', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   await page.getByRole('button', { name: '图形', exact: true }).click()
@@ -147,6 +164,46 @@ test('with 200 components, Tab keeps moving through rows beyond the rendered win
   await expect(row).toBeVisible()
   await row.getByRole('checkbox').focus()
   for (let i = 0; i < 40; i++) await page.keyboard.press('Tab')
-  const focusedRow = await page.evaluate(() => Number(document.activeElement?.closest('[data-index]')?.getAttribute('data-index')))
+  const focusedRow = await page.evaluate(() =>
+    Number(document.activeElement?.closest('[data-index]')?.getAttribute('data-index')),
+  )
   expect(focusedRow).toBeGreaterThan(62)
+})
+
+test('the expression panel is fully operable with the keyboard (004 FR-013)', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Firefox/WebKit 的 Playwright 没有剪贴板权限: 用桩接住写入
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: () => Promise.resolve() },
+    })
+  })
+  await page.goto('/')
+  const button = page.getByRole('button', { name: '表达式', exact: true })
+  await button.focus()
+  expect(await focusIsVisible(page)).toBe(true)
+  await page.keyboard.press('Enter')
+  const panel = page.getByRole('region', { name: '表达式' })
+  await expect(panel).toBeVisible()
+  await expect(panel.getByRole('heading', { name: '表达式' })).toBeFocused()
+
+  // 方向键切换写法
+  await panel.getByRole('radio', { name: '波形' }).focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect(panel.getByRole('radio', { name: '参数方程' })).toBeChecked()
+  expect(await page.getByTestId('expression-plain').textContent()).toContain('x(t) = ')
+
+  // Tab 到"复制"并回车 → 提示
+  await panel.getByRole('button', { name: '复制' }).focus()
+  expect(await focusIsVisible(page)).toBe(true)
+  await page.keyboard.press('Enter')
+  await expect(page.getByLabel('提示')).toContainText('已复制')
+
+  // Esc 收起并把焦点还给按钮
+  await panel.getByRole('radio', { name: '参数方程' }).focus()
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  await expect(button).toBeFocused()
+  await expect(button).toHaveAttribute('aria-expanded', 'false')
 })

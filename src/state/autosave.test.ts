@@ -3,8 +3,9 @@ import type { FunctionRepository } from '../storage/FunctionRepository'
 import { setRepository } from '../storage/repository'
 import { resetStores } from '../test/resetStores'
 import { useToastStore } from '../ui/toastStore'
-import { AUTOSAVE_DELAY_MS, restoreDraft, startAutosave } from './autosave'
+import { AUTOSAVE_DELAY_MS, currentDraft, restoreDraft, startAutosave } from './autosave'
 import { useDocumentStore } from './documentStore'
+import { useExpressionStore } from './expressionStore'
 import { usePlaybackStore } from './playbackStore'
 import { useViewStore } from './viewStore'
 
@@ -26,6 +27,17 @@ afterEach(() => {
 })
 
 describe('autosave', () => {
+  test('expression view preferences are session-only and never enter the draft (004 FR-015)', async () => {
+    const saveDraft = vi.spyOn(repository, 'saveDraft')
+    const before = JSON.stringify(currentDraft())
+    useExpressionStore.getState().toggleOpen()
+    useExpressionStore.getState().setNotation('parametric')
+    useExpressionStore.getState().setFormat('latex')
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS + 1)
+    expect(saveDraft).not.toHaveBeenCalled()
+    expect(JSON.stringify(currentDraft())).toBe(before)
+  })
+
   test('debounces a burst of edits into a single draft write', async () => {
     const saveDraft = vi.spyOn(repository, 'saveDraft')
     useDocumentStore.getState().addComponent()

@@ -33,7 +33,10 @@ for (const width of WIDTHS) {
 
     // 功能 003: 图形对话框与绘制模式的控件也不得越出视口
     await page.getByRole('button', { name: '图形', exact: true }).click()
-    for (const control of [page.getByRole('button', { name: '雪花' }), page.getByRole('tab', { name: '导入' })]) {
+    for (const control of [
+      page.getByRole('button', { name: '雪花' }),
+      page.getByRole('tab', { name: '导入' }),
+    ]) {
       const rect = await control.boundingBox()
       expect(rect && rect.x >= 0 && rect.x + rect.width <= width).toBe(true)
     }
@@ -42,6 +45,25 @@ for (const width of WIDTHS) {
     const toolbar = await page.getByRole('toolbar', { name: '手绘工具' }).boundingBox()
     expect(toolbar && toolbar.x >= 0 && toolbar.x + toolbar.width <= width).toBe(true)
     await page.getByRole('button', { name: '退出绘制' }).click()
+
+    // 功能 004: 表达式面板展开后, 控件与公式区都不得越出视口
+    await page.getByRole('button', { name: '表达式', exact: true }).click()
+    const expression = page.getByRole('region', { name: '表达式' })
+    for (const control of [
+      expression.getByRole('radio', { name: '参数方程' }),
+      expression.getByRole('button', { name: '复制' }),
+      expression.locator('.expression-panel__scroll'),
+    ]) {
+      await control.scrollIntoViewIfNeeded()
+      const rect = await control.boundingBox()
+      expect(rect && rect.x >= 0 && rect.x + rect.width <= width).toBe(true)
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      ),
+    ).toBeLessThanOrEqual(0)
+    await page.getByRole('button', { name: '表达式', exact: true }).click()
 
     for (const name of ['播放', '保存', '导出']) {
       const button = page.getByRole('button', { name, exact: true })

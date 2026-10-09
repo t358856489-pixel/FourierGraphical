@@ -1,0 +1,186 @@
+/* 表达式折叠面板: 嵌在分量面板的头部与列表之间, 与预设区同一套纸面语言 */
+.expression-panel {
+  display: grid;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.expression-panel__title:focus-visible {
+  outline-offset: 4px;
+}
+
+.expression-panel__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+
+.expression-panel__choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.expression-panel__choice legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+}
+
+.expression-panel__radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.expression-panel__note {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.expression-panel__note--animated {
+  color: var(--accent);
+}
+
+.expression-panel__empty {
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  text-align: center;
+  color: var(--ink-soft);
+  border: 1px dashed var(--panel-line);
+  border-radius: var(--radius-panel);
+}
+
+/* 公式区: 等宽数字, 一项一行, 长项允许在任意处折行而不溢出 */
+.expression-panel__scroll {
+  max-height: 16rem;
+  padding: var(--space-2) var(--space-3);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  background: var(--panel-sunken);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-sunken);
+}
+
+.expression__equation + .expression__equation {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--panel-line);
+}
+
+.expression__lhs {
+  display: block;
+  font-weight: 600;
+}
+
+.expr-term {
+  display: grid;
+  grid-template-columns: 1ch auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-1);
+  color: var(--ink);
+}
+
+.expr-term__op {
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* 色标与分量列表的 chip 同一做法: 深色 bezel 内的一段分量色, 不把浅色直接当文字色 */
+.expr-term__chip {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 0.875rem;
+  background: var(--bezel);
+  border-radius: 2px;
+}
+
+.expr-term__chip span {
+  width: 0.75rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--term-color, var(--ink-soft));
+}
+
+.expr-term__body sup {
+  font-size: 0.8em;
+  line-height: 1;
+}
+
+.expr-term__badge {
+  margin-left: var(--space-1);
+  padding: 0 var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: var(--radius-panel);
+}
+
+.expr-term[data-color='c0'] {
+  --term-color: var(--component-c0);
+}
+.expr-term[data-color='c1'] {
+  --term-color: var(--component-c1);
+}
+.expr-term[data-color='c2'] {
+  --term-color: var(--component-c2);
+}
+.expr-term[data-color='c3'] {
+  --term-color: var(--component-c3);
+}
+.expr-term[data-color='c4'] {
+  --term-color: var(--component-c4);
+}
+.expr-term[data-color='c5'] {
+  --term-color: var(--component-c5);
+}
+.expr-term[data-color='c6'] {
+  --term-color: var(--component-c6);
+}
+.expr-term[data-color='c7'] {
+  --term-color: var(--component-c7);
+}
+.expr-term[data-color='c8'] {
+  --term-color: var(--component-c8);
+}
+.expr-term[data-color='c9'] {
+  --term-color: var(--component-c9);
+}
+.expr-term[data-color='c10'] {
+  --term-color: var(--component-c10);
+}
+.expr-term[data-color='c11'] {
+  --term-color: var(--component-c11);
+}
+
+/* 回退文本框 (US2): 剪贴板不可用时供手动复制 */
+.expression-panel__fallback {
+  width: 100%;
+  min-height: 6rem;
+  padding: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  resize: vertical;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius-panel);
+}
+
+.expression-panel__alert {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--danger);
+}

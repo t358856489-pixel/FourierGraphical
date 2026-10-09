@@ -133,6 +133,7 @@ export type ErrorCode =
   | 'EXPORT_UNSUPPORTED'
   | 'EXPORT_FAILED'
   | 'EXPORT_ABORTED'
+  | 'CLIPBOARD_UNAVAILABLE'
 
 export interface AppError {
   readonly code: ErrorCode

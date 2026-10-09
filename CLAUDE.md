@@ -1,6 +1,6 @@
 # FourierGraphical 开发指南
 
-基于所有功能计划自动生成. 最后更新时间: 2026-09-21
+基于所有功能计划自动生成. 最后更新时间: 2026-10-09
 
 ## 活跃技术
 - TypeScript 6 (strict) + React 19 + Vite 8, 纯前端单页应用, 无后端 (001-fourier-visual-editor)
@@ -37,6 +37,7 @@ pnpm dev | pnpm test | pnpm test:coverage | pnpm test:e2e | pnpm lint | pnpm typ
 - 单文件 < 800 行, 单函数 < 50 行; 按功能而非文件类型组织
 
 ## 最近变更
+- 004-view-copy-expression: 已实现(查看 / 复制表达式). 表达式(复数 / 参数方程 / 波形)由 `src/core/expression/` 纯函数从 `(函数, t)` 派生, 直接抄写求值器约定; 非模态折叠面板嵌入分量面板(`src/features/expression/`); 复制纯文本 / LaTeX, 剪贴板失败退回全选文本框; 含关键帧参数按当前时刻瞬时值显示并标注, 播放时按 250 ms 节流刷新. 无新运行时依赖; `katex` 仅为测试用开发依赖(ESLint 禁止运行时导入)
 - 003-shape-to-fourier: 已实现(图形库 / 手绘 / 导入 SVG → 傅立叶函数; 上限 200). 路径→分量用等弧长重采样 + DFT(`src/core/shape/`, 无新依赖); MAX_COMPONENTS 50 → 200, 轨迹采样预算改为按分量数自适应; SVG 只用 DOMParser 本地解析
 - 002-canvas-display-options: 已实现(网格/坐标轴分离、轨迹保留、背景色). 不新增依赖. 新增纯函数模块 `core/color`、`core/trailPlan`、`render/palette`; 显示选项只进 `ViewSettings`(应用级偏好), 已保存函数的格式不变
 - 001-fourier-visual-editor: 新增实施计划(规范、研究、数据模型、契约、quickstart)
